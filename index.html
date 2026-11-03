@@ -279,7 +279,7 @@
             {"NoBilling": "2809583473", "BillingDate": "02/11/2026", "ShipTo": "APOTEK VIRSHA", "Kota": "KOTA SORONG", "Komersil": 28490, "PPn": 3134, "Salesman": "ULLAN DEATRIS HERMAWAN", "Barang": "OBAT", "Expedisi": "DRIVER", "TglKirim": "02/11/2026", "Dokumentasi": "DONE", "SP": "TIDAK ADA SP", "DateReceive": "02/11/2026"}
         ];
 
-        // URL Web App Google Apps Script Anda yang sudah aktif
+        // URL Web App Google Apps Script Anda
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwzNSar-DdKqzOsgmVailbJVACq8k9P2Aaq7jvVrrlhWT_dilGIiEuyKKseIckNIIpiQ/exec";
 
         let activeFilter = 'ALL';
@@ -380,7 +380,7 @@
 
                 document.getElementById('form-message').innerText = '⏳ Menyimpan ke Google Spreadsheet...';
 
-                // Mengirim data secara otomatis ke Web App Google Apps Script
+                // Mengirim data ke Google Apps Script Web App
                 fetch(WEB_APP_URL, {
                     method: "POST",
                     mode: "no-cors",
