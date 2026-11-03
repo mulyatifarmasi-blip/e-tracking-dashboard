@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Tracking Invoice Sorong - Dashboard & Logistics System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- JsBarcode CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- HTML5 QR Code Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .active-kpi {
+            ring: 2px solid #2563eb;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+            transform: translateY(-2px);
+        }
+        @keyframes scanLaser {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+        .laser-line {
+            animation: scanLaser 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+    <!-- Header / Navbar -->
+    <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-truck-ramp-box"></i> E-Tracking Invoice Sorong
+                </h1>
+                <p class="text-xs text-blue-100">Monitoring Logistik & Integrasi Data Penjualan Farmasi</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="syncGoogleSheets()" id="btn-sync" class="bg-blue-800 hover:bg-blue-900 px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 border border-blue-500 transition-all">
+                    <i class="fa-solid fa-rotate" id="sync-icon"></i> Sinkronkan Google Sheets
+                </button>
+                <div class="bg-blue-800/80 px-3 py-2 rounded-lg text-xs border border-blue-600">
+                    <span id="sync-time" class="text-blue-200">Terakhir: 02/11/2026</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        <!-- Barcode Scanner & Driver Input Portal -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-barcode text-blue-600"></i> Portal Driver: Scan Barcode & Konfirmasi Faktur
+                </h2>
+                <button onclick="toggleCameraScanner()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-camera"></i> <span id="cam-btn-text">Buka Kamera Scanner</span>
+                </button>
+            </div>
+            
+            <!-- Live Camera Scanner Viewport (Hidden by default) -->
+            <div id="camera-container" class="hidden mb-6 bg-slate-900 p-4 rounded-xl border border-slate-700">
+                <div class="max-w-md mx-auto relative">
+                    <div id="reader" class="rounded-lg overflow-hidden"></div>
+                    <button onclick="toggleCameraScanner()" class="absolute top-2 right-2 bg-rose-600 text-white px-2.5 py-1 rounded text-xs font-bold z-20">Tutup Kamera</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Barcode Input / Scanner Box -->
+                <div class="bg-slate-900 text-white rounded-xl p-5 flex flex-col justify-between relative overflow-hidden">
+                    <div class="absolute inset-0 bg-blue-500/10 pointer-events-none"></div>
+                    <div>
+                        <label class="block text-xs text-slate-400 font-semibold mb-2">SCAN BARCODE / MASUKKAN NO. BILLING</label>
+                        <div class="relative mb-3">
+                            <input type="text" id="scan-input" placeholder="Contoh: 2809583350" oninput="handleManualInput(this.value)"
+                                   class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                            <button onclick="searchBilling()" class="absolute right-2 top-2 text-slate-400 hover:text-white">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </button>
+                        </div>
+
+                        <!-- Visual Barcode & Laser Scanner Animation -->
+                        <div class="bg-white p-3 rounded-lg border border-slate-700 flex flex-col items-center justify-center relative overflow-hidden min-h-[80px]">
+                            <div class="absolute inset-x-0 h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] laser-line z-10"></div>
+                            <svg id="barcode-display" class="w-full max-h-16"></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="my-3 border-t border-slate-800 pt-3">
+                        <p class="text-xs text-slate-400 mb-2">Pilih Sampel No. Billing:</p>
+                        <div class="flex flex-wrap gap-1.5" id="billing-pills">
+                            <!-- Pills loaded dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-slate-400 flex items-center justify-between">
+                        <span>Status Scanner: <span class="text-emerald-400 font-semibold">Aktif</span></span>
+                        <i class="fa-solid fa-qrcode text-lg text-blue-400"></i>
+                    </div>
+                </div>
+
+                <!-- Logistics Confirmation Form -->
+                <div class="lg:col-span-2 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                    <form id="tracking-form" onsubmit="updateTrackingData(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Outlet / Ship to Party</label>
+                                <input type="text" id="form-outlet" readonly placeholder="Pilih No. Billing..." class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Salesman</label>
+                                <input type="text" id="form-salesman" readonly placeholder="-" class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Komersil (Rp)</label>
+                                <input type="text" id="form-komersil" readonly placeholder="Rp 0" class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 font-bold">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 border-t border-slate-200 pt-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tgl Pengiriman (Driver)</label>
+                                <input type="date" id="form-tgl-kirim" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Date Receive (Outlet)</label>
+                                <input type="date" id="form-tgl-terima" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Status Fisik SP</label>
+                                <select id="form-sp" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
+                                    <option value="ADA SP">ADA SP</option>
+                                    <option value="TIDAK ADA SP">TIDAK ADA SP</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Status Dokumen/Delivery</label>
+                                <select id="form-status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
+                                    <option value="DONE">DONE (Selesai)</option>
+                                    <option value="BELUM DIKIRIM">BELUM DIKIRIM / IN TRANSIT</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <span id="form-message" class="text-xs text-emerald-600 font-medium"></span>
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-sm">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan & Update Tracking
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Clickable Filter Cards Grid -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div onclick="filterKPI('ALL')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Komersil</p>
+                <h3 class="text-xl font-extrabold text-slate-900 mt-1" id="kpi-total-komersil">Rp 94.075.005</h3>
+                <span class="text-[11px] text-blue-600 font-medium">25 Invoices Total</span>
+            </div>
+
+            <div onclick="filterKPI('DONE')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pengiriman DONE</p>
+                <h3 class="text-xl font-extrabold text-emerald-600 mt-1" id="kpi-done-count">18</h3>
+                <span class="text-[11px] text-slate-500">Klik untuk Filter</span>
+            </div>
+
+            <div onclick="filterKPI('PENDING')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-400 transition-all">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">In Transit / Pending</p>
+                <h3 class="text-xl font-extrabold text-amber-600 mt-1" id="kpi-pending-count">7</h3>
+                <span class="text-[11px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Proses Driver</span>
+            </div>
+
+            <div onclick="filterKPI('ADA SP')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-400 transition-all">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">ADA SP</p>
+                <h3 class="text-xl font-extrabold text-indigo-600 mt-1" id="kpi-sp-ada">0</h3>
