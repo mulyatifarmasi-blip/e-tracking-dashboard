@@ -279,6 +279,9 @@
             {"NoBilling": "2809583473", "BillingDate": "02/11/2026", "ShipTo": "APOTEK VIRSHA", "Kota": "KOTA SORONG", "Komersil": 28490, "PPn": 3134, "Salesman": "ULLAN DEATRIS HERMAWAN", "Barang": "OBAT", "Expedisi": "DRIVER", "TglKirim": "02/11/2026", "Dokumentasi": "DONE", "SP": "TIDAK ADA SP", "DateReceive": "02/11/2026"}
         ];
 
+        // URL Web App Google Apps Script Anda yang sudah aktif
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwzNSar-DdKqzOsgmVailbJVACq8k9P2Aaq7jvVrrlhWT_dilGIiEuyKKseIckNIIpiQ/exec";
+
         let activeFilter = 'ALL';
         let salesmanChart, expedisiChart;
 
@@ -365,16 +368,42 @@
             const index = invoiceData.findIndex(i => i.NoBilling === noBilling);
 
             if (index !== -1) {
-                invoiceData[index].TglKirim = document.getElementById('form-tgl-kirim').value || invoiceData[index].TglKirim;
-                invoiceData[index].DateReceive = document.getElementById('form-tgl-terima').value || invoiceData[index].DateReceive;
-                invoiceData[index].SP = document.getElementById('form-sp').value;
-                invoiceData[index].Dokumentasi = document.getElementById('form-status').value;
+                const tglKirim = document.getElementById('form-tgl-kirim').value;
+                const tglTerima = document.getElementById('form-tgl-terima').value;
+                const statusSP = document.getElementById('form-sp').value;
+                const statusDok = document.getElementById('form-status').value;
 
-                document.getElementById('form-message').innerText = `✅ Data #${noBilling} berhasil diperbarui!`;
-                
-                updateKPIs();
-                updateCharts();
-                renderTable();
+                invoiceData[index].TglKirim = tglKirim;
+                invoiceData[index].DateReceive = tglTerima;
+                invoiceData[index].SP = statusSP;
+                invoiceData[index].Dokumentasi = statusDok;
+
+                document.getElementById('form-message').innerText = '⏳ Menyimpan ke Google Spreadsheet...';
+
+                // Mengirim data secara otomatis ke Web App Google Apps Script
+                fetch(WEB_APP_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        NoBilling: noBilling,
+                        TglKirim: tglKirim,
+                        DateReceive: tglTerima,
+                        SP: statusSP,
+                        Dokumentasi: statusDok
+                    })
+                }).then(() => {
+                    document.getElementById('form-message').innerText = `✅ Data #${noBilling} berhasil diperbarui di Dashboard & Google Spreadsheet!`;
+                    updateKPIs();
+                    updateCharts();
+                    renderTable();
+                }).catch(error => {
+                    console.error("Error:", error);
+                    document.getElementById('form-message').innerText = '⚠️ Gagal menyinkronkan ke Spreadsheet.';
+                });
+
             } else {
                 alert('Pilih atau masukkan No. Billing terlebih dahulu!');
             }
