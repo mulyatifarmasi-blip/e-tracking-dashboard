@@ -4,377 +4,1466 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIM Persediaan Farmasi - RSAL Kodaeral XIV</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{--navy:#123b65;--blue:#1769aa;--bg:#f3f6fa;--white:#fff;--text:#243247;--muted:#718096;--border:#e3e9f0;--green:#16845b;--red:#c43d3d}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-button,input,select{font:inherit}button{cursor:pointer}
-#loginPanel{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:#edf2f7}
-.login-card{width:100%;max-width:400px;padding:32px;background:white;border-radius:16px;box-shadow:0 10px 35px #102b461c}
-.login-logo{width:55px;height:55px;display:grid;place-items:center;background:var(--navy);color:white;border-radius:12px;font-size:25px;font-weight:bold;margin-bottom:20px}
-.login-card h2{margin:0 0 8px;color:var(--navy)}.login-card p{color:var(--muted);font-size:14px}
-.login-card label{display:block;margin:16px 0 7px;font-size:13px;font-weight:bold}
-.login-card input{width:100%;padding:13px;border:1px solid var(--border);border-radius:8px;outline-color:var(--blue)}
-.primary-btn{padding:12px 18px;background:var(--navy);color:white;border:0;border-radius:8px;font-weight:bold}
-.login-card .primary-btn{width:100%;margin-top:20px}.primary-btn:disabled{opacity:.6;cursor:wait}
-#loginMessage{color:var(--red);font-size:13px;line-height:1.5}
-#app{display:none;min-height:100vh}.topbar{height:66px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:20}
-.brand{font-weight:bold;color:var(--navy);font-size:17px}.brand small{display:block;font-size:11px;color:var(--muted);font-weight:normal;margin-top:4px}
-.user-area{display:flex;align-items:center;gap:12px;font-size:13px}.role{background:#e7f0fa;color:var(--navy);padding:6px 10px;border-radius:20px;font-weight:bold}
-.logout-btn,.refresh-btn{border:1px solid var(--border);background:white;padding:8px 12px;border-radius:7px}
-.layout{display:flex;min-height:calc(100vh - 66px)}.sidebar{width:235px;flex-shrink:0;background:var(--navy);padding:22px 12px;color:white}
-.sidebar-title{color:#a9c5df;font-size:11px;padding:10px 12px;text-transform:uppercase;letter-spacing:1px}
-.nav-btn{width:100%;display:block;padding:12px;margin-bottom:5px;border:0;border-radius:7px;color:#dce8f3;background:transparent;text-align:left;font-size:14px}
-.nav-btn:hover,.nav-btn.active{background:#ffffff20;color:white}
-main{flex:1;min-width:0;padding:28px}.page-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
-.page-heading h1{margin:0;font-size:24px;color:var(--navy)}.page-heading p{color:var(--muted);margin:7px 0 0;font-size:13px}
-.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:22px}
-.stat-card{padding:20px;border:1px solid var(--border);border-radius:12px;background:white}
-.stat-card .label{color:var(--muted);font-size:13px}.stat-card .number{font-size:28px;font-weight:bold;color:var(--navy);margin-top:12px}
-.panel{background:white;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;overflow:hidden}
-.panel h3{margin:0 0 16px;color:var(--navy);font-size:16px}.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:550px}
-th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
-th{color:var(--muted);background:#f8fafc}.status{display:inline-block;padding:5px 9px;background:#e6f5ee;color:var(--green);border-radius:20px;font-size:11px}
-.notice{padding:14px;border-radius:8px;background:#fff8e6;color:#8a641b;font-size:13px;line-height:1.5;margin-bottom:18px}
-.muted{color:var(--muted);font-size:13px}.empty{padding:25px;text-align:center;color:var(--muted)}
-.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
-.field label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
-.field input,.field select{width:100%;padding:11px;border:1px solid var(--border);border-radius:7px}
-.action-btn{border:1px solid var(--border);background:white;border-radius:7px;padding:7px 10px;margin:2px}
-.action-btn:hover{background:#edf5fc;border-color:var(--blue)}
-.receipt-line label{display:block;font-size:12px;font-weight:bold}
-.receipt-line input,.receipt-line select{display:block;width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);border-radius:7px}
-.unit-info{margin-top:7px;padding:9px 10px;background:#edf5fc;border-radius:7px;color:var(--navy);font-size:12px;min-height:34px}
-.quantity-preview{margin-top:7px;padding:9px 10px;background:#e8f6ef;color:#16845b;border-radius:7px;font-size:12px;font-weight:bold;min-height:34px}
-.receipt-detail{font-size:12px;line-height:1.7;min-width:220px}
-.receipt-detail-item{padding:5px 0;border-bottom:1px dashed var(--border)}.receipt-detail-item:last-child{border-bottom:0}
-.edit-panel{border:2px solid var(--blue)}
-@media(max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar{width:195px}}
-@media(max-width:650px){.topbar{padding:0 12px}.brand{font-size:14px}.user-area{gap:6px}.user-name{display:none}.layout{display:block}.sidebar{width:100%;display:flex;overflow-x:auto;padding:8px}.sidebar-title{display:none}.nav-btn{width:auto;white-space:nowrap;margin:0 3px;padding:10px}main{padding:17px}.cards{gap:10px}.stat-card{padding:14px}.stat-card .number{font-size:23px}.page-heading h1{font-size:20px}.form-grid{grid-template-columns:1fr}}
+:root{
+  --navy:#123b65;
+  --blue:#1769aa;
+  --light:#eef4fa;
+  --bg:#f5f7fb;
+  --white:#fff;
+  --text:#263445;
+  --muted:#718096;
+  --border:#dce4ed;
+  --green:#168653;
+  --red:#d33b3b;
+  --orange:#d98a19;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+/* LOGIN */
+#loginScreen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:linear-gradient(135deg,#123b65,#1769aa);
+}
+.login-box{
+  width:100%;
+  max-width:410px;
+  background:white;
+  padding:32px;
+  border-radius:14px;
+  box-shadow:0 12px 35px #0002;
+}
+.login-box h2{color:var(--navy);margin:0 0 8px}
+.login-box p{color:var(--muted);margin-bottom:24px}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{
+  width:245px;
+  background:var(--navy);
+  color:white;
+  padding:20px 14px;
+  flex-shrink:0;
+}
+.brand{
+  padding:8px 10px 22px;
+  border-bottom:1px solid #ffffff30;
+  margin-bottom:18px;
+}
+.brand h2{font-size:17px;margin:0 0 6px}
+.brand small{color:#cbd9e8}
+.nav-btn{
+  width:100%;
+  border:0;
+  color:#e5edf5;
+  background:transparent;
+  padding:12px;
+  text-align:left;
+  border-radius:7px;
+  margin:3px 0;
+  font-size:14px;
+}
+.nav-btn:hover,.nav-btn.active{
+  background:#ffffff20;
+  color:white;
+}
+.nav-btn span{display:inline-block;width:25px}
+.main{flex:1;min-width:0}
+.topbar{
+  background:white;
+  border-bottom:1px solid var(--border);
+  padding:15px 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.topbar strong{color:var(--navy)}
+.user-info{font-size:13px;color:var(--muted)}
+.content{padding:22px;max-width:1600px;margin:auto}
+.page-title{margin:0 0 18px;color:var(--navy);font-size:22px}
+.panel{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:17px;
+  margin-bottom:18px;
+}
+.panel h3{margin:0 0 15px;color:var(--navy);font-size:16px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:15px;
+}
+.kpi{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:18px;
+}
+.kpi small{color:var(--muted)}
+.kpi strong{
+  display:block;
+  color:var(--navy);
+  font-size:25px;
+  margin-top:9px;
+}
+.kpi.warning strong{color:var(--orange)}
+.kpi.danger strong{color:var(--red)}
+
+/* FORM */
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:13px;
+}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  color:#46566a;
+}
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border:1px solid #ccd6e2;
+  border-radius:6px;
+  background:white;
+  color:var(--text);
+}
+textarea{min-height:75px;resize:vertical}
+.btn{
+  border:0;
+  border-radius:6px;
+  padding:10px 15px;
+  color:white;
+  background:var(--blue);
+  font-weight:600;
+  margin:4px 3px 4px 0;
+}
+.btn:hover{filter:brightness(.94)}
+.btn.secondary{background:#64748b}
+.btn.success{background:var(--green)}
+.btn.danger{background:var(--red)}
+.btn.warning{background:var(--orange)}
+.btn.small{padding:6px 9px;font-size:12px}
+.actions{margin-top:14px}
+.table-wrap{overflow-x:auto}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:650px;
+  font-size:13px;
+}
+th,td{
+  padding:11px 10px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  white-space:nowrap;
+}
+th{background:#f0f5fa;color:var(--navy)}
+.empty{text-align:center;color:var(--muted);padding:25px}
+.status{
+  display:inline-block;
+  border-radius:20px;
+  padding:4px 9px;
+  font-size:11px;
+  background:#e7f5ed;
+  color:var(--green);
+}
+.status.warning{background:#fff3d9;color:#a36a0d}
+.status.danger{background:#fde8e8;color:var(--red)}
+.notice{
+  background:#fff8e8;
+  border:1px solid #f1d99e;
+  color:#795b1c;
+  padding:12px;
+  border-radius:7px;
+  margin-bottom:15px;
+  font-size:13px;
+}
+.receipt-line{
+  border:1px solid var(--border);
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:10px;
+}
+.unit-info{font-size:11px;color:var(--muted);margin-top:5px}
+.mobile-menu{display:none}
+
+@media(max-width:850px){
+  .sidebar{width:205px}
+}
+@media(max-width:650px){
+  .app{display:block}
+  .sidebar{width:100%;padding:10px}
+  .brand{padding:8px;margin-bottom:5px}
+  .nav-list{display:grid;grid-template-columns:repeat(2,1fr);gap:2px}
+  .nav-btn{font-size:12px;padding:9px}
+  .content{padding:13px}
+  .topbar{padding:12px}
+}
 </style>
 </head>
+
 <body>
-<div id="loginPanel"><div class="login-card">
-  <div class="login-logo">SF</div><h2>SIM Persediaan Farmasi</h2><p>Klinik RSAL Kodaeral XIV</p>
-  <form id="loginForm">
-    <label for="loginEmail">Email</label><input id="loginEmail" type="email" placeholder="Masukkan email" required>
-    <label for="loginPassword">Password</label><input id="loginPassword" type="password" placeholder="Masukkan password" required>
-    <button class="primary-btn" id="loginButton" type="submit">LOGIN</button>
-  </form><div id="loginMessage" role="alert"></div>
-</div></div>
-<div id="app">
-<header class="topbar"><div class="brand">SIM PERSEDIAAN FARMASI<small>KLINIK RSAL KODAERAL XIV</small></div>
-<div class="user-area"><span class="user-name" id="userName"></span><span class="role" id="userRole"></span><button class="logout-btn" id="logoutButton">Logout</button></div></header>
-<div class="layout"><aside class="sidebar">
-  <div class="sidebar-title">Menu Utama</div>
-  <button class="nav-btn active" data-page="dashboard">▦ Dashboard</button>
-  <button class="nav-btn" data-page="items">▤ Master Barang</button>
-  <button class="nav-btn" data-page="batches">▣ Stok per Batch</button>
-  <div class="sidebar-title">Transaksi</div>
-  <button class="nav-btn" data-page="receipts">↓ Penerimaan</button>
-  <button class="nav-btn" data-page="issues">↑ Pengeluaran</button>
-  <button class="nav-btn" data-page="recap">▤ Rekap Pengeluaran</button>
-  <button class="nav-btn" data-page="cards">▧ Kartu Stok</button>
-  <button class="nav-btn" data-page="stocktake">☑ Stok Opname</button>
-  <div class="sidebar-title">Sistem</div><button class="nav-btn" data-page="settings">⚙ Pengaturan</button>
-</aside><main><div id="pageContent"></div></main></div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>SIM Persediaan Farmasi</h2>
+    <p>RSAL Kodaeral XIV</p>
+
+    <form id="loginForm">
+      <label>Email
+        <input id="loginEmail" type="email" required autocomplete="username">
+      </label>
+      <br>
+      <label>Password
+        <input id="loginPassword" type="password" required autocomplete="current-password">
+      </label>
+      <br>
+      <button class="btn" type="submit" style="width:100%">Login</button>
+    </form>
+
+    <div id="loginMessage" style="color:#d33b3b;font-size:13px;margin-top:12px"></div>
+  </div>
 </div>
+
+<!-- APPLICATION -->
+<div id="appScreen" class="app hidden">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <h2>SIM FARMASI</h2>
+      <small>RSAL Kodaeral XIV</small>
+    </div>
+
+    <div class="nav-list">
+      <button class="nav-btn active" data-page="dashboard"><span>▦</span>Dashboard</button>
+      <button class="nav-btn" data-page="items"><span>▤</span>Master Barang</button>
+      <button class="nav-btn" data-page="batches"><span>▧</span>Stok per Batch</button>
+      <button class="nav-btn" data-page="receipts"><span>⇩</span>Penerimaan</button>
+      <button class="nav-btn" data-page="cards"><span>▥</span>Kartu Stok</button>
+      <button class="nav-btn" data-page="issues"><span>⇧</span>Pengeluaran</button>
+      <button class="nav-btn" data-page="recap"><span>▨</span>Rekapitulasi</button>
+      <button class="nav-btn" data-page="stocktake"><span>☷</span>Stock Opname</button>
+      <button class="nav-btn" data-page="users"><span>♙</span>Pengaturan Pengguna</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <strong>SIM Persediaan Farmasi - RSAL Kodaeral XIV</strong>
+      <div>
+        <span class="user-info" id="userInfo"></span>
+        <button class="btn danger small" onclick="logout()">Keluar</button>
+      </div>
+    </div>
+
+    <div class="content" id="pageContent"></div>
+  </main>
+</div>
+
 <script>
-/* KONFIGURASI SUPABASE */
-const SUPABASE_URL="https://janxyyhnbsrplcepyrgb.supabase.co";
-const SUPABASE_KEY="sb_publishable_sb6G7bJjiUIseKwUeg3gtIA_11vdxJoO";
-let supabaseClient=null,currentProfile=null,itemsData=[],batchesData=[],editingItemId=null,editingReceiptId=null;
-const $=id=>document.getElementById(id);
+/* =====================================================
+   1. KONFIGURASI SUPABASE
+===================================================== */
 
-function escapeHTML(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
-function formatNumber(value){return Number(value||0).toLocaleString("id-ID");}
-function formatQuantity(value,unit){return `${formatNumber(value)}${unit?" "+unit:""}`;}
-function showLoginError(message){$("loginMessage").textContent=message;}
-function initializeSupabase(){
-  try{
-    const raw=SUPABASE_URL.trim();
-    if(!raw||raw.includes("MASUKKAN_")){showLoginError("Project URL belum diisi.");return false;}
-    const parsed=new URL(raw);
-    if(!["https:","http:"].includes(parsed.protocol)||parsed.username||parsed.password||parsed.search||parsed.hash|| (parsed.pathname!=="/"&&parsed.pathname!=="")){showLoginError("Project URL tidak valid.");return false;}
-    if(!SUPABASE_KEY.trim()||SUPABASE_KEY.includes("MASUKKAN_")){showLoginError("Publishable Key belum diisi.");return false;}
-    if(!window.supabase?.createClient){showLoginError("Library Supabase gagal dimuat. Periksa koneksi internet.");return false;}
-    supabaseClient=window.supabase.createClient(raw.replace(/\/+$/,""),SUPABASE_KEY.trim());return true;
-  }catch(e){showLoginError("Format Project URL tidak valid: "+e.message);return false;}
+const SUPABASE_URL = "https://janxyyhnbsrplcepyrgb.supabase.co";
+
+/* Ganti dengan Publishable Key dari Supabase Dashboard */
+const SUPABASE_KEY = "MASUKKAN_PUBLISHABLE_KEY_ANDA";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+let currentUser = null;
+let currentProfile = null;
+let items = [];
+let batches = [];
+let currentPage = "dashboard";
+let receiptEditId = null;
+
+/* =====================================================
+   2. FUNGSI UMUM
+===================================================== */
+
+function el(id){
+  return document.getElementById(id);
 }
 
-/* LOGIN DAN PROFIL */
-$("loginForm").addEventListener("submit",async event=>{
-  event.preventDefault();if(!supabaseClient)return;
-  $("loginButton").disabled=true;$("loginButton").textContent="Memproses...";showLoginError("");
-  try{const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error)throw error;await loadUserProfile(data.user);}
-  catch(e){showLoginError("Login gagal: "+e.message);}
-  finally{$("loginButton").disabled=false;$("loginButton").textContent="LOGIN";}
+function escapeHTML(value){
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  })[c]);
+}
+
+function rupiah(value){
+  return new Intl.NumberFormat("id-ID",{
+    style:"currency",
+    currency:"IDR",
+    maximumFractionDigits:0
+  }).format(Number(value)||0);
+}
+
+function number(value){
+  return new Intl.NumberFormat("id-ID").format(Number(value)||0);
+}
+
+function dateID(value){
+  if(!value)return "-";
+  return new Date(value).toLocaleDateString("id-ID");
+}
+
+function isAdmin(){
+  return currentProfile?.role === "admin";
+}
+
+function showMessage(message){
+  alert(message);
+}
+
+function pageHeader(title){
+  return `<h2 class="page-title">${title}</h2>`;
+}
+
+function emptyRow(colspan,message="Belum ada data"){
+  return `<tr><td colspan="${colspan}" class="empty">${message}</td></tr>`;
+}
+
+function requireAdmin(){
+  if(!isAdmin()){
+    showMessage("Akses hanya untuk Admin.");
+    return false;
+  }
+  return true;
+}
+
+/* =====================================================
+   3. LOGIN DAN SESSION
+===================================================== */
+
+async function initializeApp(){
+  const {data:{session},error} =
+    await supabaseClient.auth.getSession();
+
+  if(error){
+    console.error(error);
+    return;
+  }
+
+  if(session){
+    await loadUser(session.user);
+  }
+}
+
+async function loadUser(user){
+  currentUser = user;
+
+  const {data,error} = await supabaseClient
+    .from("profiles")
+    .select("id,full_name,role")
+    .eq("id",user.id)
+    .single();
+
+  if(error){
+    showMessage("Profil pengguna tidak ditemukan: "+error.message);
+    return;
+  }
+
+  currentProfile = data;
+
+  el("loginScreen").classList.add("hidden");
+  el("appScreen").classList.remove("hidden");
+
+  el("userInfo").textContent =
+    `${data.full_name || user.email} (${data.role || "user"})`;
+
+  document.querySelectorAll('[data-page="users"]').forEach(button=>{
+    button.classList.toggle("hidden",!isAdmin());
+  });
+
+  await refreshData();
+  showPage("dashboard");
+}
+
+el("loginForm").addEventListener("submit",async function(event){
+  event.preventDefault();
+
+  el("loginMessage").textContent="Memproses login...";
+
+  const email=el("loginEmail").value.trim();
+  const password=el("loginPassword").value;
+
+  const {data,error}=await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    el("loginMessage").textContent="Login gagal: "+error.message;
+    return;
+  }
+
+  await loadUser(data.user);
 });
-async function loadUserProfile(user){
-  const {data:profile,error}=await supabaseClient.from("profiles").select("full_name,role").eq("id",user.id).single();
-  if(error||!profile){await supabaseClient.auth.signOut();showLoginError("Profil pengguna tidak ditemukan atau tidak dapat dibaca: "+(error?.message||""));return;}
-  currentProfile=profile;$("userName").textContent=profile.full_name||user.email;$("userRole").textContent=(profile.role||"staff").toUpperCase();
-  $("loginPanel").style.display="none";$("app").style.display="block";
-  if(await loadDashboardData())showPage("dashboard");
+
+async function logout(){
+  const {error}=await supabaseClient.auth.signOut();
+
+  if(error){
+    showMessage(error.message);
+    return;
+  }
+
+  currentUser=null;
+  currentProfile=null;
+
+  el("appScreen").classList.add("hidden");
+  el("loginScreen").classList.remove("hidden");
+  el("loginPassword").value="";
 }
 
-/* MEMUAT DATA MASTER DAN BATCH */
-async function loadDashboardData(){
-  $("pageContent").innerHTML='<div class="empty">Mengambil data dari database...</div>';
-  try{
-    const [ir,br]=await Promise.all([supabaseClient.from("items").select("*"),supabaseClient.from("stock_batches").select("*")]);
-    if(ir.error)throw ir.error;if(br.error)throw br.error;
-    itemsData=ir.data||[];const map=Object.fromEntries(itemsData.map(x=>[x.id,x]));
-    batchesData=(br.data||[]).map(b=>({...b,item:map[b.item_id]||null,expiry:b.expiry_date}));
-    batchesData.sort((a,b)=>!a.expiry?1:!b.expiry?-1:new Date(a.expiry)-new Date(b.expiry));
-  }catch(e){
-    $("pageContent").innerHTML=`<div class="panel"><h3>Gagal membaca database</h3><p class="muted">${escapeHTML(e.message)}</p><button class="refresh-btn" onclick="refreshData()">Coba Lagi</button></div>`;return false;
-  }return true;
+supabaseClient.auth.onAuthStateChange((event,session)=>{
+  if(event==="SIGNED_OUT"){
+    el("appScreen").classList.add("hidden");
+    el("loginScreen").classList.remove("hidden");
+  }
+});
+
+/* =====================================================
+   4. DATA MASTER DAN BATCH
+===================================================== */
+
+async function refreshData(){
+  const [itemResult,batchResult]=await Promise.all([
+    supabaseClient.from("items")
+      .select("*")
+      .order("item_name"),
+    supabaseClient.from("stock_batches")
+      .select("*")
+      .order("expiry_date")
+  ]);
+
+  if(itemResult.error){
+    console.error(itemResult.error);
+    showMessage("Gagal membaca Master Barang: "+itemResult.error.message);
+    return;
+  }
+
+  if(batchResult.error){
+    console.error(batchResult.error);
+    showMessage("Gagal membaca Stok Batch: "+batchResult.error.message);
+    return;
+  }
+
+  items=itemResult.data||[];
+  batches=batchResult.data||[];
 }
 
-/* DASHBOARD */
+function itemName(id){
+  return items.find(x=>x.id===id)?.item_name||"-";
+}
+
+function itemUnit(id){
+  return items.find(x=>x.id===id)?.unit||"-";
+}
+
+/* =====================================================
+   5. NAVIGASI
+===================================================== */
+
+document.querySelectorAll(".nav-btn").forEach(button=>{
+  button.addEventListener("click",()=>{
+    showPage(button.dataset.page);
+  });
+});
+
+async function showPage(page){
+  currentPage=page;
+
+  document.querySelectorAll(".nav-btn").forEach(button=>{
+    button.classList.toggle("active",button.dataset.page===page);
+  });
+
+  await refreshData();
+
+  if(page==="dashboard")return renderDashboard();
+  if(page==="items")return renderItems();
+  if(page==="batches")return renderBatches();
+  if(page==="receipts")return renderReceipts();
+  if(page==="cards")return renderStockCards();
+  if(page==="issues")return renderIssues();
+  if(page==="recap")return renderRecap();
+  if(page==="stocktake")return renderStocktake();
+  if(page==="users")return renderUsers();
+}
+
+/* =====================================================
+   6. DASHBOARD
+===================================================== */
+
 function renderDashboard(){
-  const total=batchesData.reduce((s,b)=>s+Number(b.quantity??0),0);
-  $("pageContent").innerHTML=`<div class="page-heading"><div><h1>Dashboard</h1><p>Ringkasan persediaan farmasi</p></div><button class="refresh-btn" onclick="refreshData()">↻ Refresh</button></div>
-  <div class="notice">Data dibaca dari database Supabase. Modul pengeluaran dan stok opname masih dalam pengembangan.</div>
-  <div class="cards">
-    <div class="stat-card"><div class="label">Master Barang</div><div class="number">${formatNumber(itemsData.length)}</div></div>
-    <div class="stat-card"><div class="label">Jumlah Batch</div><div class="number">${formatNumber(batchesData.length)}</div></div>
-    <div class="stat-card"><div class="label">Total Kuantitas Batch</div><div class="number">${formatNumber(total)}</div></div>
-    <div class="stat-card"><div class="label">Status Sistem</div><div class="number" style="font-size:20px;color:var(--green)">Terhubung</div></div>
-  </div><div class="panel"><h3>Identitas Pengguna</h3><p>${escapeHTML(currentProfile?.full_name)}</p><p class="muted">Role: ${escapeHTML(currentProfile?.role)}</p></div>
-  <div class="panel"><h3>Master Barang Terbaru</h3>${renderSimpleTable(itemsData.slice(0,10))}</div>`;
-}
-function renderSimpleTable(data){
-  if(!data.length)return '<div class="empty">Belum ada data.</div>';
-  const cols=Object.keys(data[0]).slice(0,7);
-  return `<div class="table-wrap"><table><thead><tr>${cols.map(c=>`<th>${escapeHTML(c)}</th>`).join("")}</tr></thead><tbody>${data.map(r=>`<tr>${cols.map(c=>`<td>${escapeHTML(r[c])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const totalItem=items.length;
+  const totalBatch=batches.length;
+
+  const totalStock=batches.reduce((sum,b)=>
+    sum+Number(b.quantity||0),0);
+
+  const lowStock=items.filter(item=>{
+    const stock=batches
+      .filter(b=>b.item_id===item.id)
+      .reduce((sum,b)=>sum+Number(b.quantity||0),0);
+
+    return stock<=Number(item.minimum_stock||0);
+  }).length;
+
+  const today=new Date();
+  const soon=batches.filter(b=>{
+    if(!b.expiry_date)return false;
+    const days=(new Date(b.expiry_date)-today)/86400000;
+    return days>=0&&days<=90;
+  }).length;
+
+  el("pageContent").innerHTML=`
+    ${pageHeader("Dashboard")}
+
+    <div class="grid">
+      <div class="kpi">
+        <small>Jumlah Master Barang</small>
+        <strong>${number(totalItem)}</strong>
+      </div>
+      <div class="kpi">
+        <small>Jumlah Batch</small>
+        <strong>${number(totalBatch)}</strong>
+      </div>
+      <div class="kpi">
+        <small>Total Stok Fisik</small>
+        <strong>${number(totalStock)}</strong>
+      </div>
+      <div class="kpi warning">
+        <small>Barang Stok Minimum</small>
+        <strong>${number(lowStock)}</strong>
+      </div>
+      <div class="kpi danger">
+        <small>Batch Kedaluwarsa ≤ 90 Hari</small>
+        <strong>${number(soon)}</strong>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <h3>Informasi Sistem</h3>
+      <p>Selamat datang di SIM Persediaan Farmasi RSAL Kodaeral XIV.</p>
+      <p>Gunakan menu di sebelah kiri untuk mengelola persediaan farmasi.</p>
+      <button class="btn" onclick="showPage('batches')">Lihat Stok Batch</button>
+    </div>
+  `;
 }
 
-/* MASTER BARANG */
+/* =====================================================
+   7. MASTER BARANG
+===================================================== */
+
 function renderItems(){
-  const admin=currentProfile?.role==="admin";
-  $("pageContent").innerHTML=`<div class="page-heading"><div><h1>Master Barang</h1><p>Pengelolaan data master persediaan farmasi</p></div><button class="refresh-btn" onclick="refreshData()">↻ Refresh</button></div>
-  ${admin?`<div class="panel"><h3 id="itemFormTitle">Tambah Barang Baru</h3><form id="itemForm"><div class="form-grid">
-  <div class="field"><label>Kode Barang</label><input id="itemCode" maxlength="50" required></div>
-  <div class="field"><label>Nama Barang</label><input id="itemName" maxlength="200" required></div>
-  <div class="field"><label>Kategori</label><input id="itemCategory" maxlength="100"></div>
-  <div class="field"><label>Satuan</label><input id="itemUnit" maxlength="30" required></div>
-  <div class="field"><label>Stok Minimum</label><input id="itemMinimum" type="number" min="0" step="0.01" value="0" required></div></div><br>
-  <button class="primary-btn" id="saveItemButton">Simpan Barang</button><button type="button" class="refresh-btn" id="cancelItemEdit" style="display:none">Batal</button><p id="itemMessage" class="muted"></p></form></div>`:'<div class="notice">Akun Staff hanya dapat melihat data Master Barang.</div>'}
-  <div class="panel"><h3>Daftar Barang (${itemsData.length})</h3><input id="itemSearch" type="search" placeholder="Cari kode atau nama barang..." style="width:100%;max-width:400px;padding:11px;margin-bottom:15px;border:1px solid var(--border);border-radius:7px"><div id="itemsTable"></div></div>`;
-  renderItemsTableWithActions(itemsData);
-  $("itemSearch").addEventListener("input",function(){const q=this.value.toLowerCase();renderItemsTableWithActions(itemsData.filter(i=>[i.item_code,i.item_name,i.category].some(v=>String(v||"").toLowerCase().includes(q))));});
-  if(admin){$("itemForm").addEventListener("submit",saveItem);$("cancelItemEdit").addEventListener("click",resetItemForm);}
-}
-function renderItemsTableWithActions(data){
-  const c=$("itemsTable"),admin=currentProfile?.role==="admin";if(!data.length){c.innerHTML='<div class="empty">Belum ada data barang yang sesuai.</div>';return;}
-  c.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Kode</th><th>Nama Barang</th><th>Kategori</th><th>Satuan</th><th>Stok Minimum</th><th>Status</th>${admin?"<th>Aksi</th>":""}</tr></thead><tbody>
-  ${data.map(i=>`<tr><td>${escapeHTML(i.item_code)}</td><td>${escapeHTML(i.item_name)}</td><td>${escapeHTML(i.category||"-")}</td><td>${escapeHTML(i.unit)}</td><td>${formatNumber(i.minimum_stock)}</td><td>${i.is_active?'<span class="status">Aktif</span>':'<span class="status" style="background:#fce8e8;color:#a22">Nonaktif</span>'}</td>
-  ${admin?`<td><button class="action-btn" data-edit="${escapeHTML(i.id)}">Ubah</button><button class="action-btn" data-toggle="${escapeHTML(i.id)}">${i.is_active?"Nonaktifkan":"Aktifkan"}</button></td>`:""}</tr>`).join("")}</tbody></table></div>`;
-  c.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editItem(b.dataset.edit)));
-  c.querySelectorAll("[data-toggle]").forEach(b=>b.addEventListener("click",()=>toggleItem(b.dataset.toggle)));
-}
-async function saveItem(e){
-  e.preventDefault();if(currentProfile?.role!=="admin")return;
-  const msg=$("itemMessage"),btn=$("saveItemButton");
-  const item={item_code:$("itemCode").value.trim(),item_name:$("itemName").value.trim(),category:$("itemCategory").value.trim()||null,unit:$("itemUnit").value.trim(),minimum_stock:Number($("itemMinimum").value)};
-  if(!item.item_code||!item.item_name||!item.unit){msg.textContent="Kode, nama, dan satuan wajib diisi.";return;}
-  if(!Number.isFinite(item.minimum_stock)||item.minimum_stock<0){msg.textContent="Stok minimum harus angka nol atau lebih.";return;}
-  btn.disabled=true;btn.textContent="Menyimpan...";
-  try{const r=editingItemId?await supabaseClient.from("items").update(item).eq("id",editingItemId):await supabaseClient.from("items").insert(item);if(r.error)throw r.error;alert(editingItemId?"Perubahan berhasil disimpan.":"Barang berhasil ditambahkan.");editingItemId=null;await loadDashboardData();showPage("items");}
-  catch(err){msg.textContent="Gagal menyimpan: "+err.message;btn.disabled=false;btn.textContent=editingItemId?"Simpan Perubahan":"Simpan Barang";}
-}
-function editItem(id){const i=itemsData.find(x=>x.id===id);if(!i)return;editingItemId=id;$("itemCode").value=i.item_code||"";$("itemName").value=i.item_name||"";$("itemCategory").value=i.category||"";$("itemUnit").value=i.unit||"";$("itemMinimum").value=i.minimum_stock??0;$("itemFormTitle").textContent="Ubah Data Barang";$("saveItemButton").textContent="Simpan Perubahan";$("cancelItemEdit").style.display="inline-block";$("itemForm").scrollIntoView({behavior:"smooth"});}
-function resetItemForm(){editingItemId=null;$("itemForm").reset();$("itemMinimum").value=0;$("itemFormTitle").textContent="Tambah Barang Baru";$("saveItemButton").textContent="Simpan Barang";$("cancelItemEdit").style.display="none";$("itemMessage").textContent="";}
-async function toggleItem(id){
-  if(currentProfile?.role!=="admin")return;const i=itemsData.find(x=>x.id===id);if(!i)return;
-  const next=!i.is_active;if(!confirm(`Yakin ingin ${next?"mengaktifkan":"menonaktifkan"} ${i.item_name}?`))return;
-  const {error}=await supabaseClient.from("items").update({is_active:next}).eq("id",id);if(error){alert("Gagal mengubah status: "+error.message);return;}await loadDashboardData();showPage("items");
+  el("pageContent").innerHTML=`
+    ${pageHeader("Master Barang")}
+
+    ${isAdmin()?`
+    <div class="panel">
+      <h3>Tambah Barang</h3>
+      <form id="itemForm">
+        <div class="form-grid">
+          <label>Kode Barang
+            <input id="itemCode" required>
+          </label>
+          <label>Nama Barang
+            <input id="itemName" required>
+          </label>
+          <label>Kategori
+            <input id="itemCategory">
+          </label>
+          <label>Satuan
+            <input id="itemUnit" required placeholder="Tablet, Strip, Botol">
+          </label>
+          <label>Stok Minimum
+            <input id="itemMinimum" type="number" min="0" value="0">
+          </label>
+        </div>
+        <div class="actions">
+          <button class="btn success">Simpan Barang</button>
+        </div>
+      </form>
+    </div>`:""}
+
+    <div class="panel">
+      <h3>Daftar Master Barang</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kode</th>
+              <th>Nama Barang</th>
+              <th>Kategori</th>
+              <th>Satuan</th>
+              <th>Stok Minimum</th>
+              ${isAdmin()?"<th>Aksi</th>":""}
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((item,i)=>`
+              <tr>
+                <td>${i+1}</td>
+                <td>${escapeHTML(item.item_code)}</td>
+                <td>${escapeHTML(item.item_name)}</td>
+                <td>${escapeHTML(item.category)}</td>
+                <td>${escapeHTML(item.unit)}</td>
+                <td>${number(item.minimum_stock)}</td>
+                ${isAdmin()?`
+                <td>
+                  <button class="btn small" onclick="editItem('${item.id}')">Edit</button>
+                  <button class="btn danger small" onclick="deleteItem('${item.id}')">Hapus</button>
+                </td>`:""}
+              </tr>
+            `).join("")||emptyRow(isAdmin()?7:6)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  if(isAdmin()){
+    el("itemForm").addEventListener("submit",saveItem);
+  }
 }
 
-/* STOK PER BATCH */
-function getBatchStatus(b){
-  const qty=Number(b.quantity||0);
-  if(b.expiry){const today=new Date();today.setHours(0,0,0,0);const d=new Date(b.expiry+"T00:00:00");if(!Number.isNaN(d.getTime())){const diff=Math.ceil((d-today)/86400000);if(diff<0)return{key:"expired",label:"Kedaluwarsa"};if(diff<=90)return{key:"near",label:"Segera Kedaluwarsa"};}}
-  if(qty<=0)return{key:"empty",label:"Stok Kosong"};return{key:"available",label:"Tersedia"};
+async function saveItem(event){
+  event.preventDefault();
+  if(!requireAdmin())return;
+
+  const payload={
+    item_code:el("itemCode").value.trim(),
+    item_name:el("itemName").value.trim(),
+    category:el("itemCategory").value.trim(),
+    unit:el("itemUnit").value.trim(),
+    minimum_stock:Number(el("itemMinimum").value||0),
+    is_active:true
+  };
+
+  const {error}=await supabaseClient.from("items").insert(payload);
+
+  if(error){
+    showMessage("Gagal menyimpan barang: "+error.message);
+    return;
+  }
+
+  showMessage("Barang berhasil disimpan.");
+  await showPage("items");
 }
-function formatExpiry(v){if(!v)return"-";const d=new Date(v+"T00:00:00");return Number.isNaN(d.getTime())?"-":d.toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"});}
+
+async function editItem(id){
+  if(!requireAdmin())return;
+
+  const item=items.find(x=>x.id===id);
+  if(!item)return;
+
+  const name=prompt("Nama barang:",item.item_name);
+  if(name===null)return;
+
+  const unit=prompt("Satuan:",item.unit);
+  if(unit===null)return;
+
+  const minimum=prompt("Stok minimum:",item.minimum_stock||0);
+  if(minimum===null)return;
+
+  const {error}=await supabaseClient.from("items")
+    .update({
+      item_name:name.trim(),
+      unit:unit.trim(),
+      minimum_stock:Number(minimum)
+    })
+    .eq("id",id);
+
+  if(error){
+    showMessage("Gagal mengedit barang: "+error.message);
+    return;
+  }
+
+  await showPage("items");
+}
+
+async function deleteItem(id){
+  if(!requireAdmin())return;
+  if(!confirm("Hapus barang ini?"))return;
+
+  const {error}=await supabaseClient.from("items")
+    .update({is_active:false})
+    .eq("id",id);
+
+  if(error){
+    showMessage("Gagal menonaktifkan barang: "+error.message);
+    return;
+  }
+
+  showMessage("Barang dinonaktifkan.");
+  await showPage("items");
+}
+
+/* =====================================================
+   8. STOK PER BATCH
+===================================================== */
+
 function renderBatches(){
-  const total=batchesData.reduce((s,b)=>s+Number(b.quantity||0),0),counts={expired:0,near:0,empty:0,available:0};batchesData.forEach(b=>counts[getBatchStatus(b).key]++);
-  $("pageContent").innerHTML=`<div class="page-heading"><div><h1>Stok per Batch</h1><p>Monitoring persediaan berdasarkan nomor batch dan ED</p></div><button class="refresh-btn" onclick="refreshData()">↻ Refresh</button></div>
-  <div class="cards"><div class="stat-card"><div class="label">Jumlah Batch</div><div class="number">${formatNumber(batchesData.length)}</div></div><div class="stat-card"><div class="label">Total Kuantitas</div><div class="number">${formatNumber(total)}</div></div><div class="stat-card"><div class="label">Segera Kedaluwarsa</div><div class="number" style="color:#b7791f">${formatNumber(counts.near)}</div></div><div class="stat-card"><div class="label">Kedaluwarsa</div><div class="number" style="color:var(--red)">${formatNumber(counts.expired)}</div></div></div>
-  <div class="panel"><h3>Daftar Stok per Batch</h3><div class="form-grid" style="margin-bottom:18px"><div class="field"><label>Pencarian</label><input id="batchSearch" type="search" placeholder="Nama barang, kode, atau nomor batch"></div><div class="field"><label>Filter Status</label><select id="batchStatusFilter"><option value="all">Semua Status</option><option value="available">Tersedia</option><option value="empty">Stok Kosong</option><option value="near">Segera Kedaluwarsa</option><option value="expired">Kedaluwarsa</option></select></div></div><div id="batchTable"></div></div>`;
-  function display(){
-    const q=$("batchSearch").value.toLowerCase(),f=$("batchStatusFilter").value;
-    const rows=batchesData.filter(b=>[b.item?.item_code,b.item?.item_name,b.batch_number].join(" ").toLowerCase().includes(q)&&(f==="all"||getBatchStatus(b).key===f));
-    if(!rows.length){$("batchTable").innerHTML='<div class="empty">Tidak ada data batch yang sesuai.</div>';return;}
-    $("batchTable").innerHTML=`<div class="table-wrap"><table><thead><tr><th>No.</th><th>Kode Barang</th><th>Nama Barang</th><th>Nomor Batch</th><th>ED</th><th>Jumlah Stok</th><th>Satuan</th><th>Status</th></tr></thead><tbody>
-    ${rows.map((b,n)=>{const s=getBatchStatus(b),style=s.key==="expired"?"background:#fce8e8;color:#a22":s.key==="near"?"background:#fff3cd;color:#856404":s.key==="empty"?"background:#edf0f4;color:#596579":"";return `<tr><td>${n+1}</td><td>${escapeHTML(b.item?.item_code||"-")}</td><td>${escapeHTML(b.item?.item_name||"Barang tidak ditemukan")}</td><td>${escapeHTML(b.batch_number||"-")}</td><td>${formatExpiry(b.expiry)}</td><td><strong>${escapeHTML(formatQuantity(b.quantity,b.item?.unit))}</strong></td><td>${escapeHTML(b.item?.unit||"-")}</td><td><span class="status" style="${style}">${s.label}</span></td></tr>`;}).join("")}</tbody></table></div><p class="muted" style="margin-top:12px">Menampilkan ${rows.length} dari ${batchesData.length} batch. Batas peringatan kedaluwarsa: 90 hari.</p>`;
+  el("pageContent").innerHTML=`
+    ${pageHeader("Stok per Batch")}
+
+    <div class="panel">
+      <div class="form-grid">
+        <label>Cari Barang
+          <input id="batchSearch" placeholder="Nama atau kode barang">
+        </label>
+        <label>Filter Kedaluwarsa
+          <select id="expiryFilter">
+            <option value="">Semua</option>
+            <option value="expired">Sudah kedaluwarsa</option>
+            <option value="90">≤ 90 hari</option>
+            <option value="180">≤ 180 hari</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Daftar Stok per Batch</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kode Barang</th>
+              <th>Nama Barang</th>
+              <th>Nomor Batch</th>
+              <th>Kedaluwarsa</th>
+              <th>Jumlah</th>
+              <th>Satuan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="batchTable"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  el("batchSearch").addEventListener("input",filterBatches);
+  el("expiryFilter").addEventListener("change",filterBatches);
+  filterBatches();
+}
+
+function filterBatches(){
+  const keyword=el("batchSearch").value.toLowerCase();
+  const filter=el("expiryFilter").value;
+  const today=new Date();
+
+  const data=batches.filter(b=>{
+    const item=items.find(x=>x.id===b.item_id);
+    const text=((item?.item_name||"")+" "+(item?.item_code||"")).toLowerCase();
+
+    if(!text.includes(keyword))return false;
+
+    const days=b.expiry_date?
+      (new Date(b.expiry_date)-today)/86400000:null;
+
+    if(filter==="expired"&&!(days<0))return false;
+    if(filter==="90"&&!(days>=0&&days<=90))return false;
+    if(filter==="180"&&!(days>=0&&days<=180))return false;
+
+    return true;
+  });
+
+  el("batchTable").innerHTML=data.map((b,i)=>{
+    const days=b.expiry_date?
+      Math.ceil((new Date(b.expiry_date)-today)/86400000):null;
+
+    let status="Normal";
+    let cls="";
+
+    if(days!==null&&days<0){
+      status="Kedaluwarsa";
+      cls="danger";
+    }else if(days!==null&&days<=90){
+      status="Segera ED";
+      cls="warning";
+    }
+
+    return `
+      <tr>
+        <td>${i+1}</td>
+        <td>${escapeHTML(items.find(x=>x.id===b.item_id)?.item_code)}</td>
+        <td>${escapeHTML(itemName(b.item_id))}</td>
+        <td>${escapeHTML(b.batch_number)}</td>
+        <td>${dateID(b.expiry_date)}</td>
+        <td>${number(b.quantity)}</td>
+        <td>${escapeHTML(itemUnit(b.item_id))}</td>
+        <td><span class="status ${cls}">${status}</span></td>
+      </tr>
+    `;
+  }).join("")||emptyRow(8);
+}
+
+/* =====================================================
+   9. PENERIMAAN BARANG
+===================================================== */
+
+function receiptItemOptions(selected=""){
+  return `<option value="">Pilih barang</option>`+
+    items.map(i=>`
+      <option value="${i.id}" ${i.id===selected?"selected":""}>
+        ${escapeHTML(i.item_code)} - ${escapeHTML(i.item_name)}
+      </option>
+    `).join("");
+}
+
+function renderReceipts(){
+  receiptEditId=null;
+
+  el("pageContent").innerHTML=`
+    ${pageHeader("Penerimaan Barang")}
+
+    ${isAdmin()?`
+    <div class="panel">
+      <h3>Input Penerimaan Barang</h3>
+
+      <form id="receiptForm">
+        <div class="form-grid">
+          <label>Nomor Penerimaan
+            <input id="receiptNumber" required>
+          </label>
+          <label>Tanggal Penerimaan
+            <input id="receiptDate" type="date" required value="${new Date().toISOString().slice(0,10)}">
+          </label>
+          <label>Supplier
+            <input id="receiptSupplier">
+          </label>
+        </div>
+
+        <br>
+        <label>Catatan
+          <textarea id="receiptNotes"></textarea>
+        </label>
+
+        <h3 style="margin-top:20px">Detail Barang</h3>
+        <div id="receiptLines"></div>
+
+        <button type="button" class="btn secondary" onclick="addReceiptLine()">+ Tambah Barang</button>
+        <div class="actions">
+          <button class="btn success" type="submit">Simpan Penerimaan</button>
+        </div>
+      </form>
+    </div>`:""}
+
+    <div class="panel">
+      <h3>Riwayat Penerimaan</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nomor Penerimaan</th>
+              <th>Tanggal</th>
+              <th>Supplier</th>
+              <th>Catatan</th>
+              ${isAdmin()?"<th>Aksi</th>":""}
+            </tr>
+          </thead>
+          <tbody id="receiptHistory"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  if(isAdmin()){
+    addReceiptLine();
+    el("receiptForm").addEventListener("submit",saveReceipt);
   }
-  $("batchSearch").addEventListener("input",display);$("batchStatusFilter").addEventListener("change",display);display();
+
+  loadReceiptHistory();
 }
 
-/* FORM PENERIMAAN */
-function receiptItemOptions(){return itemsData.filter(i=>i.is_active!==false).map(i=>`<option value="${escapeHTML(i.id)}">${escapeHTML(i.item_code)} - ${escapeHTML(i.item_name)}</option>`).join("");}
-function addReceiptLine(){
-  const row=document.createElement("div");row.className="receipt-line panel";row.style.marginBottom="12px";
-  row.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
-  <label>Nama Barang<select class="r-item" required><option value="">Pilih barang</option>${receiptItemOptions()}</select><div class="unit-info r-unit-info">Pilih barang untuk melihat satuan.</div></label>
-  <label>Nomor Batch<input class="r-batch" required placeholder="Nomor batch"></label><label>Tanggal Kedaluwarsa<input class="r-expiry" type="date" required></label>
-  <label class="r-quantity-label">Jumlah<input class="r-quantity" type="number" min="0.01" step="any" required placeholder="Masukkan jumlah"><div class="quantity-preview r-quantity-preview">Preview jumlah akan tampil di sini.</div></label>
-  <label>Harga Satuan (Rp)<input class="r-price" type="number" min="0" step="any" required placeholder="Harga per satuan"></label></div><button type="button" class="refresh-btn r-remove" style="margin-top:10px">Hapus Barang</button>`;
-  $("receiptLines").appendChild(row);
-  const sel=row.querySelector(".r-item"),qty=row.querySelector(".r-quantity"),preview=row.querySelector(".r-quantity-preview"),unitInfo=row.querySelector(".r-unit-info"),label=row.querySelector(".r-quantity-label");
-  function update(){const i=itemsData.find(x=>x.id===sel.value),unit=i?.unit?.trim()||"";unitInfo.textContent="Satuan: "+(unit||"Belum diisi");label.firstChild.textContent="Jumlah ("+unit+")";const n=Number(qty.value);preview.textContent=!i||qty.value===""?"Preview jumlah akan tampil di sini.":Number.isFinite(n)&&n>0?"Jumlah diterima: "+formatQuantity(n,unit):"Masukkan jumlah yang valid.";}
-  sel.addEventListener("change",update);qty.addEventListener("input",update);row.querySelector(".r-remove").addEventListener("click",()=>row.remove());
-}
-function addEditReceiptLine(line={}){
-  const row=document.createElement("div");row.className="receipt-line panel";row.style.marginBottom="12px";
-  row.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
-  <label>Nama Barang<select class="er-item" required><option value="">Pilih barang</option>${receiptItemOptions()}</select><div class="unit-info er-unit">Satuan barang</div></label>
-  <label>Nomor Batch<input class="er-batch" required></label><label>Tanggal Kedaluwarsa<input class="er-expiry" type="date" required></label>
-  <label>Jumlah<input class="er-quantity" type="number" min="0.01" step="any" required></label><label>Harga Satuan (Rp)<input class="er-price" type="number" min="0" step="any" required></label></div>
-  <button type="button" class="refresh-btn er-remove" style="margin-top:10px">Hapus Barang</button>`;
-  $("editReceiptLines").appendChild(row);const sel=row.querySelector(".er-item");sel.value=line.item_id||"";row.querySelector(".er-batch").value=line.batch_number||"";row.querySelector(".er-expiry").value=line.expiry_date||"";row.querySelector(".er-quantity").value=line.quantity??"";row.querySelector(".er-price").value=line.unit_price??0;
-  function update(){row.querySelector(".er-unit").textContent="Satuan: "+(itemsData.find(x=>x.id===sel.value)?.unit||"-");}sel.addEventListener("change",update);update();
-  row.querySelector(".er-remove").addEventListener("click",()=>{if($("editReceiptLines").querySelectorAll(".receipt-line").length<=1){alert("Minimal harus ada satu barang.");return;}row.remove();});
+function addReceiptLine(data={}){
+  const container=el("receiptLines");
+  const row=document.createElement("div");
+  row.className="receipt-line";
+
+  row.innerHTML=`
+    <div class="form-grid">
+      <label>Nama Barang
+        <select class="r-item" required>
+          ${receiptItemOptions(data.item_id||"")}
+        </select>
+      </label>
+      <label>Nomor Batch
+        <input class="r-batch" required value="${escapeHTML(data.batch_number||"")}">
+      </label>
+      <label>Tanggal Kedaluwarsa
+        <input class="r-expiry" type="date" required value="${escapeHTML(data.expiry_date||"")}">
+      </label>
+      <label>Jumlah
+        <input class="r-quantity" type="number" min="1" required value="${data.quantity||""}">
+      </label>
+      <label>Harga Satuan
+        <input class="r-price" type="number" min="0" value="${data.unit_price||0}">
+      </label>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn danger small" onclick="this.closest('.receipt-line').remove()">Hapus Baris</button>
+    </div>
+  `;
+
+  container.appendChild(row);
 }
 
-/* EDIT PENERIMAAN */
-async function openReceiptEdit(id){
-  if(currentProfile?.role!=="admin")return;const panel=$("receiptEditPanel");if(!panel)return;panel.innerHTML='<div class="empty">Mengambil data penerimaan...</div>';
-  try{
-    const {data:r,error}=await supabaseClient.from("goods_receipts").select("*").eq("id",id).single();if(error)throw error;
-    const {data:lines,error:le}=await supabaseClient.from("goods_receipt_lines").select("*").eq("receipt_id",id);if(le)throw le;if(!lines?.length)throw new Error("Detail barang tidak ditemukan.");
-    editingReceiptId=id;
-    panel.innerHTML=`<div class="panel edit-panel"><h3>Edit Penerimaan</h3><div class="notice">Perubahan akan dikoreksi pada stok dan dicatat sebagai pergerakan stok baru. Riwayat pergerakan sebelumnya tidak dihapus.</div>
-    <form id="editReceiptForm"><div class="form-grid"><div class="field"><label>Nomor Penerimaan</label><input id="erNumber" required></div><div class="field"><label>Tanggal Penerimaan</label><input id="erDate" type="date" required></div><div class="field"><label>Nama Supplier</label><input id="erSupplier" required></div><div class="field"><label>Catatan</label><input id="erNotes"></div></div><hr style="margin:20px 0"><h3>Detail Barang</h3><div id="editReceiptLines"></div>
-    <button type="button" class="refresh-btn" id="addEditLine">+ Tambah Barang</button><hr style="margin:20px 0"><button type="submit" class="primary-btn" id="saveEditReceipt">Simpan Perubahan</button> <button type="button" class="refresh-btn" id="cancelEditReceipt">Batal</button><p id="editReceiptMessage" class="muted"></p></form></div>`;
-    $("erNumber").value=r.receipt_number||"";$("erDate").value=r.receipt_date||"";$("erSupplier").value=r.supplier||"";$("erNotes").value=r.notes||"";
-    lines.forEach(l=>addEditReceiptLine(l));$("addEditLine").addEventListener("click",()=>addEditReceiptLine());
-    $("cancelEditReceipt").addEventListener("click",()=>{editingReceiptId=null;panel.innerHTML="";});
-    $("editReceiptForm").addEventListener("submit",saveReceiptEdit);panel.scrollIntoView({behavior:"smooth"});
-  }catch(e){editingReceiptId=null;panel.innerHTML=`<div class="notice">Gagal membuka data penerimaan: ${escapeHTML(e.message)}</div>`;}
-}
-async function saveReceiptEdit(e){
-  e.preventDefault();if(!editingReceiptId||currentProfile?.role!=="admin")return;
-  const btn=$("saveEditReceipt"),msg=$("editReceiptMessage"),rows=[...document.querySelectorAll("#editReceiptLines .receipt-line")];
-  const lines=rows.map(row=>({item_id:row.querySelector(".er-item").value,batch_number:row.querySelector(".er-batch").value.trim(),expiry_date:row.querySelector(".er-expiry").value,quantity:Number(row.querySelector(".er-quantity").value),unit_price:Number(row.querySelector(".er-price").value)}));
-  if(!lines.length||lines.some(l=>!l.item_id||!l.batch_number||!l.expiry_date||!Number.isFinite(l.quantity)||l.quantity<=0||!Number.isFinite(l.unit_price)||l.unit_price<0)){msg.textContent="Periksa kembali seluruh detail barang.";return;}
-  const params={p_receipt_id:editingReceiptId,p_receipt_number:$("erNumber").value.trim(),p_receipt_date:$("erDate").value,p_supplier:$("erSupplier").value.trim(),p_notes:$("erNotes").value.trim(),p_lines:lines};
-  if(!params.p_receipt_number||!params.p_receipt_date||!params.p_supplier){msg.textContent="Nomor, tanggal, dan supplier wajib diisi.";return;}
-  if(!confirm("Simpan perubahan penerimaan? Stok dan Kartu Stok akan dikoreksi."))return;
-  btn.disabled=true;btn.textContent="Menyimpan...";msg.textContent="";
-  try{const {error}=await supabaseClient.rpc("edit_goods_receipt",params);if(error)throw error;alert("Perubahan penerimaan berhasil disimpan.");editingReceiptId=null;await loadDashboardData();showPage("receipts");}
-  catch(err){msg.textContent="Gagal mengedit penerimaan: "+err.message;btn.disabled=false;btn.textContent="Simpan Perubahan";}
+function collectReceiptLines(){
+  return [...document.querySelectorAll(".receipt-line")].map(row=>{
+    const itemId=row.querySelector(".r-item").value;
+
+    return {
+      item_id:itemId,
+      batch_number:row.querySelector(".r-batch").value.trim(),
+      expiry_date:row.querySelector(".r-expiry").value,
+      quantity:Number(row.querySelector(".r-quantity").value),
+      unit_price:Number(row.querySelector(".r-price").value||0)
+    };
+  });
 }
 
-/* RIWAYAT PENERIMAAN */
+function validateReceipt(lines){
+  if(!lines.length){
+    showMessage("Tambahkan minimal satu barang.");
+    return false;
+  }
+
+  for(const line of lines){
+    if(!line.item_id||!line.batch_number||!line.expiry_date||
+       !Number.isFinite(line.quantity)||line.quantity<=0){
+      showMessage("Lengkapi semua detail barang dan pastikan jumlah lebih dari nol.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function saveReceipt(event){
+  event.preventDefault();
+  if(!requireAdmin())return;
+
+  const lines=collectReceiptLines();
+  if(!validateReceipt(lines))return;
+
+  const payload={
+    p_receipt_number:el("receiptNumber").value.trim(),
+    p_receipt_date:el("receiptDate").value,
+    p_supplier:el("receiptSupplier").value.trim(),
+    p_notes:el("receiptNotes").value.trim(),
+    p_lines:lines
+  };
+
+  const {error}=await supabaseClient.rpc("create_goods_receipt",payload);
+
+  if(error){
+    showMessage("Gagal menyimpan penerimaan: "+error.message);
+    return;
+  }
+
+  showMessage("Penerimaan berhasil disimpan.");
+  await showPage("receipts");
+}
+
 async function loadReceiptHistory(){
-  const target=$("receiptHistory");if(!target)return;target.innerHTML='<div class="empty">Memuat riwayat penerimaan...</div>';
-  const {data,error}=await supabaseClient.from("goods_receipts").select("id,receipt_number,receipt_date,supplier,notes,created_at").order("receipt_date",{ascending:false});
-  if(error){target.innerHTML=`<div class="notice">Gagal membaca riwayat: ${escapeHTML(error.message)}</div>`;return;}
-  if(!data?.length){target.innerHTML='<div class="empty">Belum ada transaksi penerimaan.</div>';return;}
-  const ids=data.map(x=>x.id),{data:lines,error:le}=await supabaseClient.from("goods_receipt_lines").select("id,receipt_id,item_id,batch_number,expiry_date,quantity,unit_price,unit").in("receipt_id",ids);
-  const itemMap=Object.fromEntries(itemsData.map(i=>[i.id,i])),by={};if(!le&&lines)lines.forEach(l=>(by[l.receipt_id]??=[]).push(l));
-  target.innerHTML=`${le?`<div class="notice">Detail barang belum dapat ditampilkan: ${escapeHTML(le.message)}</div>`:""}<div class="table-wrap"><table><thead><tr><th>No. Penerimaan</th><th>Tanggal</th><th>Pemasok</th><th>Detail Barang</th><th>Catatan</th>${currentProfile?.role==="admin"?"<th>Aksi</th>":""}</tr></thead><tbody>
-  ${data.map(r=>{const detail=(by[r.id]||[]).map(l=>`<div class="receipt-detail-item"><strong>${escapeHTML(itemMap[l.item_id]?.item_name||"Barang tidak ditemukan")}</strong><br>Jumlah: ${escapeHTML(formatQuantity(l.quantity,l.unit||itemMap[l.item_id]?.unit||""))}<br>Batch: ${escapeHTML(l.batch_number||"-")}<br>ED: ${escapeHTML(formatExpiry(l.expiry_date))}</div>`).join("")||'<span class="muted">Detail tidak tersedia</span>';
-  return `<tr><td><strong>${escapeHTML(r.receipt_number)}</strong></td><td>${formatExpiry(r.receipt_date)}</td><td>${escapeHTML(r.supplier||"-")}</td><td><div class="receipt-detail">${detail}</div></td><td>${escapeHTML(r.notes||"-")}</td>${currentProfile?.role==="admin"?`<td><button class="action-btn" data-edit-receipt="${escapeHTML(r.id)}">Edit</button></td>`:""}</tr>`;}).join("")}</tbody></table></div>`;
-  target.querySelectorAll("[data-edit-receipt]").forEach(b=>b.addEventListener("click",()=>openReceiptEdit(b.dataset.editReceipt)));
-}
-async function renderReceipts(){
-  const admin=currentProfile?.role==="admin";editingReceiptId=null;
-  $("pageContent").innerHTML=`<div class="page-heading"><div><h1>Penerimaan Barang</h1><p>Pencatatan barang masuk dari pemasok.</p></div><button class="refresh-btn" onclick="refreshData()">↻ Refresh</button></div>
-  ${admin?`<div class="panel"><h3>Informasi Penerimaan</h3><form id="receiptForm"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-  <label>Nomor Faktur / Penerimaan<input id="receiptNumber" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px"></label>
-  <label>Tanggal Penerimaan<input id="receiptDate" type="date" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px"></label>
-  <label>Nama Pemasok<input id="receiptSupplier" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px"></label>
-  <label>Catatan<input id="receiptNotes" style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px"></label></div><hr style="margin:20px 0"><h3>Detail Barang</h3><div class="notice">Pilih barang terlebih dahulu. Satuan mengikuti satuan pada Master Barang.</div><div id="receiptLines"></div>
-  <button type="button" class="refresh-btn" id="addReceiptLine">+ Tambah Barang</button><hr style="margin:20px 0"><button type="submit" class="primary-btn" id="saveReceipt">Simpan Penerimaan</button><div id="receiptMessage" style="margin-top:12px"></div></form></div>`:'<div class="notice">Akun Staff hanya dapat melihat riwayat penerimaan. Penyimpanan transaksi hanya dapat dilakukan oleh Admin.</div>'}
-  <div id="receiptEditPanel"></div><div class="panel"><h3>Riwayat Penerimaan</h3><div id="receiptHistory"><div class="empty">Memuat data...</div></div></div>`;
-  if(admin){
-    $("receiptDate").value=new Date().toLocaleDateString("en-CA");addReceiptLine();$("addReceiptLine").addEventListener("click",addReceiptLine);
-    $("receiptForm").addEventListener("submit",async e=>{
-      e.preventDefault();const btn=$("saveReceipt"),msg=$("receiptMessage"),rows=[...document.querySelectorAll("#receiptLines .receipt-line")];
-      const lines=rows.map(r=>({item_id:r.querySelector(".r-item").value,batch_number:r.querySelector(".r-batch").value.trim(),expiry_date:r.querySelector(".r-expiry").value,quantity:r.querySelector(".r-quantity").value,unit_price:r.querySelector(".r-price").value}));
-      if(!lines.length||lines.some(l=>!l.item_id||!l.batch_number||!l.expiry_date||!Number.isFinite(Number(l.quantity))||Number(l.quantity)<=0||l.unit_price===""||!Number.isFinite(Number(l.unit_price))||Number(l.unit_price)<0)){msg.textContent="Periksa kembali seluruh data barang.";return;}
-      if(!$("receiptNumber").value.trim()||!$("receiptSupplier").value.trim()||!$("receiptDate").value){msg.textContent="Nomor, tanggal, dan pemasok wajib diisi.";return;}
-      if(!confirm("Apakah data penerimaan sudah benar dan akan disimpan?"))return;
-      btn.disabled=true;btn.textContent="Menyimpan...";msg.textContent="";
-      try{const {error}=await supabaseClient.rpc("create_goods_receipt",{p_receipt_number:$("receiptNumber").value.trim(),p_receipt_date:$("receiptDate").value,p_supplier:$("receiptSupplier").value.trim(),p_notes:$("receiptNotes").value.trim(),p_lines:lines});if(error)throw error;
-        msg.textContent="Penerimaan berhasil disimpan.";$("receiptForm").reset();$("receiptDate").value=new Date().toLocaleDateString("en-CA");$("receiptLines").innerHTML="";addReceiptLine();await loadDashboardData();await loadReceiptHistory();
-      }catch(err){msg.textContent="Gagal menyimpan penerimaan: "+err.message;}finally{btn.disabled=false;btn.textContent="Simpan Penerimaan";}
-    });
-  }await loadReceiptHistory();
+  const {data,error}=await supabaseClient
+    .from("goods_receipts")
+    .select("*")
+    .order("receipt_date",{ascending:false})
+    .limit(300);
+
+  if(error){
+    el("receiptHistory").innerHTML=emptyRow(6,error.message);
+    return;
+  }
+
+  el("receiptHistory").innerHTML=(data||[]).map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${escapeHTML(r.receipt_number)}</td>
+      <td>${dateID(r.receipt_date)}</td>
+      <td>${escapeHTML(r.supplier)}</td>
+      <td>${escapeHTML(r.notes)}</td>
+      ${isAdmin()?`
+      <td>
+        <button class="btn small" onclick="editReceipt('${r.id}')">Edit</button>
+      </td>`:""}
+    </tr>
+  `).join("")||emptyRow(isAdmin()?6:5);
 }
 
-/* KARTU STOK - MEMBACA VIEW SUPABASE */
+/* =====================================================
+   10. EDIT PENERIMAAN
+===================================================== */
+
+async function editReceipt(id){
+  if(!requireAdmin())return;
+
+  const {data:header,error:headerError}=await supabaseClient
+    .from("goods_receipts")
+    .select("*")
+    .eq("id",id)
+    .single();
+
+  if(headerError){
+    showMessage(headerError.message);
+    return;
+  }
+
+  const {data:lines,error:lineError}=await supabaseClient
+    .from("goods_receipt_lines")
+    .select("*")
+    .eq("receipt_id",id);
+
+  if(lineError){
+    showMessage(lineError.message);
+    return;
+  }
+
+  receiptEditId=id;
+
+  el("pageContent").innerHTML=`
+    ${pageHeader("Edit Penerimaan Barang")}
+
+    <div class="panel">
+      <form id="editReceiptForm">
+        <div class="form-grid">
+          <label>Nomor Penerimaan
+            <input id="editReceiptNumber" required value="${escapeHTML(header.receipt_number)}">
+          </label>
+          <label>Tanggal
+            <input id="editReceiptDate" type="date" required value="${header.receipt_date}">
+          </label>
+          <label>Supplier
+            <input id="editReceiptSupplier" value="${escapeHTML(header.supplier||"")}">
+          </label>
+        </div>
+        <br>
+        <label>Catatan
+          <textarea id="editReceiptNotes">${escapeHTML(header.notes||"")}</textarea>
+        </label>
+
+        <h3 style="margin-top:20px">Detail Barang</h3>
+        <div id="editReceiptLines"></div>
+
+        <button type="button" class="btn secondary" onclick="addEditReceiptLine()">+ Tambah Barang</button>
+        <div class="actions">
+          <button class="btn success">Simpan Perubahan</button>
+          <button type="button" class="btn secondary" onclick="showPage('receipts')">Batal</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  (lines||[]).forEach(line=>addEditReceiptLine(line));
+  if(!lines?.length)addEditReceiptLine();
+
+  el("editReceiptForm").addEventListener("submit",saveEditReceipt);
+}
+
+function addEditReceiptLine(line={}){
+  const row=document.createElement("div");
+  row.className="receipt-line";
+
+  row.innerHTML=`
+    <div class="form-grid">
+      <label>Nama Barang
+        <select class="er-item" required>
+          ${receiptItemOptions(line.item_id||"")}
+        </select>
+      </label>
+      <label>Nomor Batch
+        <input class="er-batch" required value="${escapeHTML(line.batch_number||"")}">
+      </label>
+      <label>Tanggal Kedaluwarsa
+        <input class="er-expiry" type="date" required value="${escapeHTML(line.expiry_date||"")}">
+      </label>
+      <label>Jumlah
+        <input class="er-quantity" type="number" min="1" required value="${line.quantity||""}">
+      </label>
+      <label>Harga Satuan
+        <input class="er-price" type="number" min="0" value="${line.unit_price||0}">
+      </label>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn danger small" onclick="this.closest('.receipt-line').remove()">Hapus Baris</button>
+    </div>
+  `;
+
+  el("editReceiptLines").appendChild(row);
+}
+
+async function saveEditReceipt(event){
+  event.preventDefault();
+  if(!requireAdmin()||!receiptEditId)return;
+
+  const lines=[...document.querySelectorAll(".receipt-line")].map(row=>({
+    item_id:row.querySelector(".er-item").value,
+    batch_number:row.querySelector(".er-batch").value.trim(),
+    expiry_date:row.querySelector(".er-expiry").value,
+    quantity:Number(row.querySelector(".er-quantity").value),
+    unit_price:Number(row.querySelector(".er-price").value||0)
+  }));
+
+  if(!validateReceipt(lines))return;
+
+  const payload={
+    p_receipt_id:receiptEditId,
+    p_receipt_number:el("editReceiptNumber").value.trim(),
+    p_receipt_date:el("editReceiptDate").value,
+    p_supplier:el("editReceiptSupplier").value.trim(),
+    p_notes:el("editReceiptNotes").value.trim(),
+    p_lines:lines
+  };
+
+  const {error}=await supabaseClient.rpc("edit_goods_receipt",payload);
+
+  if(error){
+    showMessage("Gagal mengedit penerimaan: "+error.message);
+    return;
+  }
+
+  showMessage("Penerimaan berhasil diperbarui.");
+  receiptEditId=null;
+  await showPage("receipts");
+}
+
+/* =====================================================
+   11. KARTU STOK
+===================================================== */
+
 async function renderStockCards(){
-  $("pageContent").innerHTML=`<div class="page-heading"><div><h1>Kartu Stok</h1><p>Riwayat mutasi dan saldo berjalan persediaan farmasi.</p></div><button class="refresh-btn" id="refreshStockCard">↻ Refresh</button></div>
-  <div class="panel"><h3>Filter Kartu Stok</h3><div class="form-grid">
-  <div class="field"><label>Nama Barang</label><select id="stockCardItem"><option value="">Semua Barang</option>${itemsData.map(i=>`<option value="${escapeHTML(i.id)}">${escapeHTML(i.item_code)} - ${escapeHTML(i.item_name)}</option>`).join("")}</select></div>
-  <div class="field"><label>Nomor Batch</label><select id="stockCardBatch"><option value="">Semua Batch</option></select></div>
-  </div></div><div class="panel"><h3>Riwayat Mutasi Stok</h3><div id="stockCardTable"><div class="empty">Mengambil data Kartu Stok...</div></div></div>`;
-  $("refreshStockCard").addEventListener("click",renderStockCards);
-  $("stockCardItem").addEventListener("change",()=>{updateBatchOptions();displayStockCard();});
-  $("stockCardBatch").addEventListener("change",displayStockCard);
-  let stockCardData=[];
-  try{
-    const {data,error}=await supabaseClient.from("v_stock_card_running").select("*").order("created_at",{ascending:false}).limit(2000);
-    if(error)throw error;stockCardData=data||[];
-    updateBatchOptions();displayStockCard();
-  }catch(e){$("stockCardTable").innerHTML=`<div class="notice">Gagal membaca Kartu Stok: ${escapeHTML(e.message)}</div>`;}
+  el("pageContent").innerHTML=`
+    ${pageHeader("Kartu Stok")}
 
-  function updateBatchOptions(){
-    const itemId=$("stockCardItem").value,selected=$("stockCardBatch").value;
-    const rows=stockCardData.filter(r=>!itemId||r.item_id===itemId),map=new Map();
-    rows.forEach(r=>{if(r.batch_id)map.set(r.batch_id,r.batch_number||"-");});
-    $("stockCardBatch").innerHTML=`<option value="">Semua Batch</option>${[...map.entries()].map(([id,num])=>`<option value="${escapeHTML(id)}">${escapeHTML(num)}</option>`).join("")}`;
-    if(map.has(selected))$("stockCardBatch").value=selected;
+    <div class="panel">
+      <div class="form-grid">
+        <label>Nama Barang
+          <select id="cardItem">
+            <option value="">Semua Barang</option>
+            ${items.map(i=>`
+              <option value="${i.id}">${escapeHTML(i.item_name)}</option>
+            `).join("")}
+          </select>
+        </label>
+        <label>Nomor Batch
+          <input id="cardBatch" placeholder="Nomor batch">
+        </label>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="loadStockCards()">Tampilkan</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Riwayat Mutasi Stok</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Kode</th>
+              <th>Nama Barang</th>
+              <th>Batch</th>
+              <th>Kedaluwarsa</th>
+              <th>Jenis Mutasi</th>
+              <th>Masuk</th>
+              <th>Keluar</th>
+              <th>Saldo</th>
+              <th>Referensi</th>
+            </tr>
+          </thead>
+          <tbody id="cardTable"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  await loadStockCards();
+}
+
+async function loadStockCards(){
+  const itemId=el("cardItem").value;
+  const batchKeyword=el("cardBatch").value.trim().toLowerCase();
+
+  let query=supabaseClient
+    .from("v_stock_card_running")
+    .select("*")
+    .order("created_at",{ascending:false})
+    .limit(2000);
+
+  if(itemId)query=query.eq("item_id",itemId);
+
+  const {data,error}=await query;
+
+  if(error){
+    el("cardTable").innerHTML=emptyRow(10,error.message);
+    return;
   }
-  function displayStockCard(){
-    const itemId=$("stockCardItem").value,batchId=$("stockCardBatch").value;
-    const rows=stockCardData.filter(r=>(!itemId||r.item_id===itemId)&&(!batchId||r.batch_id===batchId));
-    if(!rows.length){$("stockCardTable").innerHTML='<div class="empty">Belum ada transaksi untuk pilihan tersebut.</div>';return;}
-    $("stockCardTable").innerHTML=`<div class="table-wrap"><table><thead><tr><th>No.</th><th>Waktu Transaksi</th><th>Kode Barang</th><th>Nama Barang</th><th>Nomor Batch</th><th>ED</th><th>Jenis</th><th>Masuk</th><th>Keluar</th><th>Saldo Berjalan</th><th>No. Referensi</th><th>Petugas (ID)</th></tr></thead><tbody>
-    ${rows.map((r,n)=>{const type=String(r.movement_type||"").toUpperCase(),inflow=type==="IN";return `<tr><td>${n+1}</td><td>${r.created_at?escapeHTML(new Date(r.created_at).toLocaleString("id-ID")):"-"}</td><td>${escapeHTML(r.item_code||"-")}</td><td><strong>${escapeHTML(r.item_name||"-")}</strong></td><td>${escapeHTML(r.batch_number||"-")}</td><td>${formatExpiry(r.expiry_date)}</td><td><span class="status" style="${inflow?"background:#e6f5ee;color:#16845b":"background:#fce8e8;color:#c43d3d"}">${escapeHTML(type||"-")}</span></td><td style="color:var(--green);font-weight:bold">${formatNumber(r.quantity_in)}</td><td style="color:var(--red);font-weight:bold">${formatNumber(r.quantity_out)}</td><td><strong>${formatNumber(r.running_balance)}</strong></td><td>${escapeHTML(r.receipt_number||r.reference_id||"-")}</td><td>${escapeHTML(r.created_by||"-")}</td></tr>`;}).join("")}</tbody></table></div><p class="muted" style="margin-top:12px">Menampilkan ${rows.length} transaksi. Saldo dihitung per barang dan per batch.</p>`;
+
+  const filtered=(data||[]).filter(row=>
+    !batchKeyword||
+    String(row.batch_number||"").toLowerCase().includes(batchKeyword)
+  );
+
+  el("cardTable").innerHTML=filtered.map(row=>`
+    <tr>
+      <td>${dateID(row.created_at)}</td>
+      <td>${escapeHTML(row.item_code)}</td>
+      <td>${escapeHTML(row.item_name)}</td>
+      <td>${escapeHTML(row.batch_number)}</td>
+      <td>${dateID(row.expiry_date)}</td>
+      <td>${escapeHTML(row.movement_type)}</td>
+      <td>${number(row.quantity_in)}</td>
+      <td>${number(row.quantity_out)}</td>
+      <td><strong>${number(row.running_balance)}</strong></td>
+      <td>${escapeHTML(row.receipt_number||row.reference_id||"-")}</td>
+    </tr>
+  `).join("")||emptyRow(10);
+}
+
+/* =====================================================
+   12. PENGELUARAN BARANG
+===================================================== */
+
+function renderIssues(){
+  el("pageContent").innerHTML=`
+    ${pageHeader("Pengeluaran Barang")}
+
+    <div class="notice">
+      Modul ini membutuhkan fungsi database transaksi pengeluaran
+      yang aman dan atomik. Jangan melakukan pengurangan stok secara
+      manual dari browser.
+    </div>
+
+    <div class="panel">
+      <h3>Stok Tersedia</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Barang</th>
+              <th>Batch</th>
+              <th>Kedaluwarsa</th>
+              <th>Stok</th>
+              <th>Satuan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${batches.map((b,i)=>`
+              <tr>
+                <td>${i+1}</td>
+                <td>${escapeHTML(itemName(b.item_id))}</td>
+                <td>${escapeHTML(b.batch_number)}</td>
+                <td>${dateID(b.expiry_date)}</td>
+                <td>${number(b.quantity)}</td>
+                <td>${escapeHTML(itemUnit(b.item_id))}</td>
+              </tr>
+            `).join("")||emptyRow(6)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   13. REKAPITULASI
+===================================================== */
+
+async function renderRecap(){
+  el("pageContent").innerHTML=`
+    ${pageHeader("Rekapitulasi Persediaan")}
+
+    <div class="panel">
+      <h3>Rekap Stok Saat Ini</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kode Barang</th>
+              <th>Nama Barang</th>
+              <th>Stok</th>
+              <th>Satuan</th>
+              <th>Stok Minimum</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((item,i)=>{
+              const stock=batches
+                .filter(b=>b.item_id===item.id)
+                .reduce((sum,b)=>sum+Number(b.quantity||0),0);
+
+              const low=stock<=Number(item.minimum_stock||0);
+
+              return `
+                <tr>
+                  <td>${i+1}</td>
+                  <td>${escapeHTML(item.item_code)}</td>
+                  <td>${escapeHTML(item.item_name)}</td>
+                  <td>${number(stock)}</td>
+                  <td>${escapeHTML(item.unit)}</td>
+                  <td>${number(item.minimum_stock)}</td>
+                  <td><span class="status ${low?"warning":""}">${low?"Stok Minimum":"Normal"}</span></td>
+                </tr>
+              `;
+            }).join("")||emptyRow(7)}
+          </tbody>
+        </table>
+      </div>
+      <button class="btn" onclick="window.print()">Cetak Rekap</button>
+    </div>
+  `;
+}
+
+/* =====================================================
+   14. STOCK OPNAME
+===================================================== */
+
+function renderStocktake(){
+  el("pageContent").innerHTML=`
+    ${pageHeader("Stock Opname")}
+
+    <div class="notice">
+      Modul Stock Opname sudah disediakan pada tampilan ini.
+      Penyimpanan hasil opname dan penyesuaian stok memerlukan
+      prosedur database khusus agar riwayat mutasi tetap tercatat.
+    </div>
+
+    <div class="panel">
+      <h3>Daftar Stok untuk Pemeriksaan</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Barang</th>
+              <th>Batch</th>
+              <th>Kedaluwarsa</th>
+              <th>Stok Sistem</th>
+              <th>Satuan</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${batches.map((b,i)=>`
+              <tr>
+                <td>${i+1}</td>
+                <td>${escapeHTML(itemName(b.item_id))}</td>
+                <td>${escapeHTML(b.batch_number)}</td>
+                <td>${dateID(b.expiry_date)}</td>
+                <td>${number(b.quantity)}</td>
+                <td>${escapeHTML(itemUnit(b.item_id))}</td>
+              </tr>
+            `).join("")||emptyRow(6)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   15. PENGATURAN PENGGUNA
+===================================================== */
+
+async function renderUsers(){
+  if(!requireAdmin())return;
+
+  el("pageContent").innerHTML=`
+    ${pageHeader("Pengaturan Pengguna")}
+
+    <div class="notice">
+      Daftar ini membaca profil pengguna yang sudah terdaftar.
+      Pembuatan akun login baru dilakukan melalui Supabase
+      Authentication oleh Admin yang berwenang.
+    </div>
+
+    <div class="panel">
+      <h3>Daftar Profil Pengguna</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Nama Pengguna</th>
+              <th>Role</th>
+              <th>ID Pengguna</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const {data,error}=await supabaseClient
+    .from("profiles")
+    .select("id,full_name,role")
+    .order("full_name");
+
+  if(error){
+    el("usersTable").innerHTML=emptyRow(4,error.message);
+    return;
   }
+
+  el("usersTable").innerHTML=(data||[]).map((u,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${escapeHTML(u.full_name)}</td>
+      <td>${escapeHTML(u.role)}</td>
+      <td>${escapeHTML(u.id)}</td>
+    </tr>
+  `).join("")||emptyRow(4);
 }
 
-/* MODUL LAIN YANG BELUM DIAKTIFKAN */
-const futurePages={
-  issues:["Pengeluaran Barang","Pencatatan barang keluar dan distribusi."],
-  recap:["Rekap Pengeluaran","Laporan pengeluaran berdasarkan periode."],
-  stocktake:["Stok Opname","Pencocokan stok fisik dengan sistem."],
-  settings:["Pengaturan","Pengaturan pengguna dan sistem."]
-};
-function renderFuturePage(page){
-  const c=futurePages[page];if(!c)return;
-  $("pageContent").innerHTML=`<div class="page-heading"><div><h1>${c[0]}</h1><p>${c[1]}</p></div></div><div class="notice">Modul ini masih dalam tahap pengembangan.</div><div class="panel"><h3>${c[0]}</h3><div class="empty">Fitur akan diaktifkan setelah alur transaksi dan keamanan selesai disiapkan.</div></div>`;
-}
+/* =====================================================
+   16. INISIALISASI
+===================================================== */
 
-/* NAVIGASI */
-function showPage(page){
-  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
-  if(page==="dashboard")renderDashboard();
-  else if(page==="items")renderItems();
-  else if(page==="batches")renderBatches();
-  else if(page==="receipts")renderReceipts();
-  else if(page==="cards")renderStockCards();
-  else if(futurePages[page])renderFuturePage(page);
-}
-document.querySelectorAll(".nav-btn").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-async function refreshData(){const page=document.querySelector(".nav-btn.active")?.dataset.page||"dashboard";if(await loadDashboardData())showPage(page);}
-$("logoutButton").addEventListener("click",async()=>{await supabaseClient.auth.signOut();location.reload();});
-async function checkSession(){
-  if(!initializeSupabase())return;
-  const {data,error}=await supabaseClient.auth.getSession();
-  if(error){showLoginError(error.message);return;}
-  if(data.session)await loadUserProfile(data.session.user);
-}
-checkSession();
+initializeApp();
+
 </script>
 </body>
 </html>
