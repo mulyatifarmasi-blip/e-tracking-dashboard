@@ -2,439 +2,931 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIM Persediaan Farmasi | Klinik RSAL Kodaeral XIV</title>
-<style>
-:root {
-  --navy:#12345a;
-  --blue:#1769aa;
-  --bg:#f3f6fa;
-  --white:#fff;
-  --text:#243247;
-  --muted:#718096;
-  --border:#e4eaf1;
-  --green:#15966b;
-  --orange:#e99a25;
-  --red:#d94b4b;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-.layout{display:flex;min-height:100vh}
-.sidebar{width:250px;background:var(--navy);color:white;padding:22px 14px;flex-shrink:0}
-.brand{padding:8px 12px 24px;border-bottom:1px solid #ffffff25}
-.brand h2{font-size:17px;margin:0 0 7px}
-.brand p{font-size:11px;color:#c7d8eb;margin:0;line-height:1.5}
-.menu-label{font-size:10px;color:#9db5d0;margin:24px 12px 10px;text-transform:uppercase;letter-spacing:1px}
-.menu button{display:flex;width:100%;border:0;background:transparent;color:#d8e5f3;padding:12px;border-radius:8px;text-align:left;margin:3px 0;cursor:pointer;font-size:13px}
-.menu button:hover,.menu button.active{background:#ffffff20;color:white}
-.main{flex:1;min-width:0}
-.topbar{height:68px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
-.topbar strong{font-size:14px}
-.user{font-size:12px;color:var(--muted)}
-.content{padding:28px;max-width:1450px;margin:auto}
-.page-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
-.page-title h1{font-size:23px;margin:0 0 6px}
-.page-title p{font-size:12px;color:var(--muted);margin:0}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
-.card{background:white;padding:20px;border:1px solid var(--border);border-radius:12px}
-.card small{color:var(--muted);font-size:12px}
-.card h2{font-size:25px;margin:12px 0 5px}
-.card p{font-size:11px;color:var(--muted);margin:0}
-.panel{background:white;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
-.panel h3{font-size:15px;margin:0 0 16px}
-.grid-two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:left}
-th{color:var(--muted);font-weight:600;background:#f8fafc}
-.badge{padding:5px 8px;border-radius:20px;font-size:10px;background:#e8f7ef;color:var(--green)}
-.badge.warning{background:#fff3df;color:#b7791f}
-.badge.danger{background:#fdeaea;color:var(--red)}
-button.primary{background:var(--blue);color:white;border:0;padding:10px 15px;border-radius:7px;cursor:pointer}
-button.secondary{background:#edf3f9;color:var(--navy);border:0;padding:10px 15px;border-radius:7px;cursor:pointer}
-.search{padding:10px;border:1px solid var(--border);border-radius:7px;width:240px;max-width:100%}
-.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:15px}
-.page{display:none}
-.page.active{display:block}
-.notice{font-size:12px;color:#8a641d;background:#fff7e7;padding:12px;border-radius:8px;margin-bottom:18px;line-height:1.6}
-.empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
-.footer{text-align:center;color:var(--muted);font-size:10px;padding:20px}
-.mobile-menu{display:none}
-@media(max-width:900px){
- .sidebar{width:210px}
- .cards{grid-template-columns:repeat(2,1fr)}
- .content{padding:20px}
-}
-@media(max-width:650px){
- .layout{display:block}
- .sidebar{width:100%;padding:12px}
- .brand{padding:8px 10px 12px}
- .menu-label{margin:12px 10px 6px}
- .menu{display:grid;grid-template-columns:repeat(2,1fr);gap:3px}
- .menu button{font-size:11px;padding:10px}
- .topbar{height:55px;padding:0 15px}
- .content{padding:15px}
- .cards{gap:9px}
- .card{padding:13px}
- .card h2{font-size:20px}
- .grid-two{grid-template-columns:1fr}
- .page-title h1{font-size:19px}
- .table-wrap{overflow-x:auto}
- table{min-width:600px}
- .search{width:100%}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIM Persediaan Farmasi - RSAL Kodaeral XIV</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --navy: #123b65;
+      --blue: #1769aa;
+      --light: #f3f6fa;
+      --white: #ffffff;
+      --text: #243247;
+      --muted: #718096;
+      --border: #e3e9f0;
+      --green: #16845b;
+      --red: #c43d3d;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--light);
+      color: var(--text);
+    }
+
+    button, input { font: inherit; }
+
+    /* LOGIN */
+    #loginPanel {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #edf2f7;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      padding: 32px;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 35px #102b461c;
+    }
+
+    .login-logo {
+      width: 55px;
+      height: 55px;
+      display: grid;
+      place-items: center;
+      background: var(--navy);
+      color: white;
+      border-radius: 12px;
+      font-size: 25px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    .login-card h2 { margin: 0 0 8px; color: var(--navy); }
+    .login-card p { color: var(--muted); font-size: 14px; }
+
+    .login-card label {
+      display: block;
+      margin: 16px 0 7px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline-color: var(--blue);
+    }
+
+    .primary-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 13px;
+      border: 0;
+      border-radius: 8px;
+      color: white;
+      background: var(--navy);
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .primary-btn:disabled { opacity: .6; cursor: wait; }
+
+    #loginMessage {
+      color: var(--red);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* APPLICATION */
+    #app { display: none; min-height: 100vh; }
+
+    .topbar {
+      height: 66px;
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand {
+      font-weight: bold;
+      color: var(--navy);
+      font-size: 17px;
+    }
+
+    .brand small {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: normal;
+      margin-top: 4px;
+    }
+
+    .user-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .role {
+      background: #e7f0fa;
+      color: var(--navy);
+      padding: 6px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      border: 1px solid var(--border);
+      background: white;
+      padding: 8px 12px;
+      border-radius: 7px;
+      cursor: pointer;
+    }
+
+    .layout { display: flex; min-height: calc(100vh - 66px); }
+
+    .sidebar {
+      width: 235px;
+      flex-shrink: 0;
+      background: var(--navy);
+      padding: 22px 12px;
+      color: white;
+    }
+
+    .sidebar-title {
+      color: #a9c5df;
+      font-size: 11px;
+      padding: 10px 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: block;
+      padding: 12px;
+      margin-bottom: 5px;
+      border: 0;
+      border-radius: 7px;
+      color: #dce8f3;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      background: #ffffff20;
+      color: white;
+    }
+
+    main {
+      flex: 1;
+      min-width: 0;
+      padding: 28px;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .page-heading h1 {
+      margin: 0;
+      font-size: 24px;
+      color: var(--navy);
+    }
+
+    .page-heading p {
+      color: var(--muted);
+      margin: 7px 0 0;
+      font-size: 13px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: white;
+    }
+
+    .stat-card .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stat-card .number {
+      font-size: 28px;
+      font-weight: bold;
+      color: var(--navy);
+      margin-top: 12px;
+    }
+
+    .panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .panel h3 {
+      margin: 0 0 16px;
+      color: var(--navy);
+      font-size: 16px;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 550px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      background: #f8fafc;
+      font-weight: bold;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      background: #e6f5ee;
+      color: var(--green);
+      border-radius: 20px;
+      font-size: 11px;
+    }
+
+    .notice {
+      padding: 14px;
+      border-radius: 8px;
+      background: #fff8e6;
+      color: #8a641b;
+      font-size: 13px;
+      line-height: 1.5;
+      margin-bottom: 18px;
+    }
+
+    .muted { color: var(--muted); font-size: 13px; }
+
+    .refresh-btn {
+      border: 1px solid var(--border);
+      background: white;
+      border-radius: 7px;
+      padding: 9px 13px;
+      cursor: pointer;
+    }
+
+    .empty {
+      padding: 25px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    @media(max-width: 900px) {
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .sidebar { width: 195px; }
+    }
+
+    @media(max-width: 650px) {
+      .topbar { padding: 0 12px; }
+      .brand { font-size: 14px; }
+      .user-area { gap: 6px; }
+      .user-name { display: none; }
+      .layout { display: block; }
+      .sidebar {
+        width: 100%;
+        display: flex;
+        overflow-x: auto;
+        padding: 8px;
+      }
+      .sidebar-title { display: none; }
+      .nav-btn {
+        width: auto;
+        white-space: nowrap;
+        margin: 0 3px;
+        padding: 10px;
+      }
+      main { padding: 17px; }
+      .cards { gap: 10px; }
+      .stat-card { padding: 14px; }
+      .stat-card .number { font-size: 23px; }
+      .page-heading h1 { font-size: 20px; }
+    }
+  </style>
 </head>
+
 <body>
-<div class="layout">
 
-<aside class="sidebar">
-  <div class="brand">
-    <h2>SIM FARMASI</h2>
-    <p>KLINIK RSAL KODAERAL XIV<br>Sistem Informasi Persediaan</p>
+<!-- LOGIN -->
+<div id="loginPanel">
+  <div class="login-card">
+    <div class="login-logo">SF</div>
+    <h2>SIM Persediaan Farmasi</h2>
+    <p>Klinik RSAL Kodaeral XIV</p>
+
+    <form id="loginForm">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email"
+        placeholder="Masukkan email" required>
+
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" type="password"
+        placeholder="Masukkan password" required>
+
+      <button class="primary-btn" id="loginButton" type="submit">
+        LOGIN
+      </button>
+    </form>
+
+    <div id="loginMessage" role="alert"></div>
   </div>
+</div>
 
-  <div class="menu-label">Menu Utama</div>
-  <nav class="menu">
-    <button class="active" onclick="showPage('overview',this)">▦ Dashboard</button>
-    <button onclick="showPage('master',this)">▤ Master Barang</button>
-    <button onclick="showPage('penerimaan',this)">↓ Penerimaan</button>
-    <button onclick="showPage('pengeluaran',this)">↑ Pengeluaran</button>
-    <button onclick="showPage('rekap',this)">▥ Rekap Pengeluaran</button>
-    <button onclick="showPage('kartu',this)">▧ Kartu Stok</button>
-    <button onclick="showPage('opname',this)">☷ Stok Opname</button>
-  </nav>
+<!-- APPLICATION -->
+<div id="app">
 
-  <div class="menu-label">Sistem</div>
-  <nav class="menu">
-    <button onclick="showPage('pengaturan',this)">⚙ Pengaturan</button>
-  </nav>
-</aside>
-
-<main class="main">
   <header class="topbar">
-    <strong>SIM Persediaan Farmasi</strong>
-    <span class="user">Klinik RSAL Kodaeral XIV</span>
+    <div class="brand">
+      SIM PERSEDIAAN FARMASI
+      <small>KLINIK RSAL KODAERAL XIV</small>
+    </div>
+
+    <div class="user-area">
+      <span class="user-name" id="userName"></span>
+      <span class="role" id="userRole"></span>
+      <button class="logout-btn" id="logoutButton">Logout</button>
+    </div>
   </header>
 
-  <div class="content">
+  <div class="layout">
 
-    <!-- DASHBOARD -->
-    <section id="overview" class="page active">
-      <div class="page-title">
-        <div>
-          <h1>Dashboard Persediaan</h1>
-          <p>Ringkasan persediaan farmasi</p>
-        </div>
-        <span class="badge warning">MODE DEMO</span>
-      </div>
+    <aside class="sidebar">
+      <div class="sidebar-title">Menu Utama</div>
 
-      <div class="notice">
-        Data pada halaman ini adalah data contoh, bukan data stok aktual.
-        Hubungkan aplikasi ke Supabase sebelum digunakan untuk operasional.
-      </div>
+      <button class="nav-btn active" data-page="dashboard">
+        ▦ Dashboard
+      </button>
 
-      <div class="cards">
-        <div class="card">
-          <small>Total Jenis Barang</small>
-          <h2>125</h2>
-          <p>Contoh data barang</p>
-        </div>
-        <div class="card">
-          <small>Total Stok</small>
-          <h2>3.450</h2>
-          <p>Contoh kuantitas barang</p>
-        </div>
-        <div class="card">
-          <small>Stok Menipis</small>
-          <h2>08</h2>
-          <p>Perlu pemeriksaan</p>
-        </div>
-        <div class="card">
-          <small>Segera Kedaluwarsa</small>
-          <h2>05</h2>
-          <p>Contoh barang mendekati ED</p>
-        </div>
-      </div>
+      <button class="nav-btn" data-page="items">
+        ▤ Master Barang
+      </button>
 
-      <div class="grid-two">
-        <div class="panel">
-          <h3>Daftar Stok Menipis</h3>
-          <div class="table-wrap">
-          <table>
-            <thead><tr><th>Nama Barang</th><th>Stok</th><th>Status</th></tr></thead>
-            <tbody>
-              <tr><td>Paracetamol 500 mg</td><td>12</td><td><span class="badge warning">Menipis</span></td></tr>
-              <tr><td>Amoxicillin 500 mg</td><td>8</td><td><span class="badge danger">Kritis</span></td></tr>
-              <tr><td>CTM 4 mg</td><td>15</td><td><span class="badge warning">Menipis</span></td></tr>
-            </tbody>
-          </table>
-          </div>
-        </div>
-        <div class="panel">
-          <h3>Monitoring Kedaluwarsa</h3>
-          <div class="table-wrap">
-          <table>
-            <thead><tr><th>Nama Barang</th><th>Batch</th><th>ED</th></tr></thead>
-            <tbody>
-              <tr><td>Vitamin C</td><td>VC001</td><td><span class="badge warning">Des 2026</span></td></tr>
-              <tr><td>Antasida</td><td>AT002</td><td><span class="badge warning">Jan 2027</span></td></tr>
-              <tr><td>Ibuprofen</td><td>IB003</td><td><span class="badge">Jun 2027</span></td></tr>
-            </tbody>
-          </table>
-          </div>
-        </div>
-      </div>
-    </section>
+      <button class="nav-btn" data-page="batches">
+        ▣ Stok per Batch
+      </button>
 
-    <!-- MASTER BARANG -->
-    <section id="master" class="page">
-      <div class="page-title">
-        <div><h1>Master Barang</h1><p>Daftar identitas obat dan perbekalan farmasi</p></div>
-        <button class="primary" onclick="alert('Form master barang akan diaktifkan setelah koneksi database dibuat.')">+ Tambah Barang</button>
-      </div>
-      <div class="panel">
-        <div class="toolbar">
-          <input class="search" placeholder="Cari kode atau nama barang...">
-          <button class="secondary" onclick="alert('Fitur impor akan diaktifkan setelah database terhubung.')">Impor Data</button>
-        </div>
-        <div class="table-wrap">
-        <table>
-          <thead><tr><th>Kode</th><th>Nama Barang</th><th>Satuan</th><th>Stok Minimum</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>OBT001</td><td>Paracetamol 500 mg</td><td>Tablet</td><td>50</td><td><span class="badge">Aktif</span></td></tr>
-            <tr><td>OBT002</td><td>Amoxicillin 500 mg</td><td>Kapsul</td><td>30</td><td><span class="badge">Aktif</span></td></tr>
-            <tr><td>OBT003</td><td>Vitamin C 500 mg</td><td>Tablet</td><td>20</td><td><span class="badge">Aktif</span></td></tr>
-          </tbody>
-        </table>
-        </div>
-      </div>
-    </section>
+      <div class="sidebar-title">Transaksi</div>
 
-    <!-- PENERIMAAN -->
-    <section id="penerimaan" class="page">
-      <div class="page-title">
-        <div><h1>Penerimaan Barang</h1><p>Pencatatan barang masuk berdasarkan batch</p></div>
-        <button class="primary" onclick="alert('Form penerimaan akan diaktifkan setelah database terhubung.')">+ Penerimaan Baru</button>
-      </div>
-      <div class="panel">
-        <div class="notice">Setiap penerimaan nantinya wajib mencatat nomor surat jalan, tanggal, sumber barang, nama barang, jumlah, satuan, nomor batch, dan tanggal kedaluwarsa.</div>
-        <div class="empty">Belum ada transaksi penerimaan yang tersimpan.</div>
-      </div>
-    </section>
+      <button class="nav-btn" data-page="receipts">
+        ↓ Penerimaan
+      </button>
 
-    <!-- PENGELUARAN -->
-    <section id="pengeluaran" class="page">
-      <div class="page-title">
-        <div><h1>Pengeluaran Obat</h1><p>Pencatatan pengeluaran berdasarkan resep</p></div>
-        <button class="primary" onclick="alert('Form pengeluaran akan diaktifkan setelah database terhubung.')">+ Pengeluaran Baru</button>
-      </div>
-      <div class="panel">
-        <div class="notice">Form transaksi nantinya mencakup tanggal, dokter, pasien, nomor rekam medis, informasi penjamin, nama obat, jumlah, batch, dan kedaluwarsa. Pemilihan batch akan mengikuti prinsip FEFO.</div>
-        <div class="empty">Belum ada transaksi pengeluaran yang tersimpan.</div>
-      </div>
-    </section>
+      <button class="nav-btn" data-page="issues">
+        ↑ Pengeluaran
+      </button>
 
-    <!-- REKAP -->
-    <section id="rekap" class="page">
-      <div class="page-title">
-        <div><h1>Rekap Pengeluaran</h1><p>Ringkasan pengeluaran obat harian dan periodik</p></div>
-        <button class="secondary" onclick="window.print()">Cetak Halaman</button>
-      </div>
-      <div class="panel">
-        <div class="toolbar">
-          <input type="date" class="search" aria-label="Tanggal awal">
-          <input type="date" class="search" aria-label="Tanggal akhir">
-        </div>
-        <div class="empty">Rekap akan tampil setelah transaksi pengeluaran tersimpan.</div>
-      </div>
-    </section>
+      <button class="nav-btn" data-page="recap">
+        ▤ Rekap Pengeluaran
+      </button>
 
-    <!-- KARTU STOK -->
-    <section id="kartu" class="page">
-      <div class="page-title">
-        <div><h1>Kartu Stok</h1><p>Mutasi persediaan per barang dan per batch</p></div>
-      </div>
-      <div class="panel">
-        <div class="toolbar">
-          <input class="search" placeholder="Cari nama atau kode barang...">
-          <button class="secondary" onclick="alert('Kartu stok akan tersedia setelah database terhubung.')">Tampilkan</button>
-        </div>
-        <div class="empty">Pilih barang untuk melihat riwayat masuk, keluar, saldo, batch, dan kedaluwarsa.</div>
-      </div>
-    </section>
+      <button class="nav-btn" data-page="cards">
+        ▧ Kartu Stok
+      </button>
 
-    <!-- OPNAME -->
-    <section id="opname" class="page">
-      <div class="page-title">
-        <div><h1>Stok Opname</h1><p>Pencocokan stok sistem dengan stok fisik</p></div>
-        <button class="primary" onclick="alert('Form stok opname akan diaktifkan setelah database terhubung.')">+ Sesi Opname</button>
-      </div>
-      <div class="panel">
-        <div class="notice">Stok opname nantinya mencatat stok sistem, stok fisik, selisih, alasan koreksi, petugas pemeriksa, dan persetujuan pejabat berwenang.</div>
-        <div class="empty">Belum ada sesi stok opname.</div>
-      </div>
-    </section>
+      <button class="nav-btn" data-page="stocktake">
+        ☑ Stok Opname
+      </button>
 
-    <!-- PENGATURAN -->
-    <section id="pengaturan" class="page">
-      <div class="page-title">
-        <div><h1>Pengaturan</h1><p>Konfigurasi aplikasi dan pengguna</p></div>
-      </div>
-      <div class="panel">
-        <h3>Informasi Sistem</h3>
-        <p style="font-size:13px;line-height:1.8">
-          <b>Nama:</b> SIM Persediaan Farmasi<br>
-          <b>Unit:</b> Klinik RSAL Kodaeral XIV<br>
-          <b>Database:</b> Supabase (belum terhubung)<br>
-          <b>Hosting:</b> GitHub Pages
-        </p>
-        <div class="notice">Manajemen akun, hak akses, audit log, dan konfigurasi database akan ditambahkan pada tahap berikutnya.</div>
-      </div>
-    </section>
+      <div class="sidebar-title">Sistem</div>
 
-    <div class="footer">
-      SIM Persediaan Farmasi Klinik RSAL Kodaeral XIV
-    </div>
+      <button class="nav-btn" data-page="settings">
+        ⚙ Pengaturan
+      </button>
+    </aside>
+
+    <main>
+      <div id="pageContent"></div>
+    </main>
+
   </div>
-</main>
 </div>
 
 <script>
-function showPage(pageId, button) {
-  document.querySelectorAll('.page').forEach(page => {
-    page.classList.remove('active');
-  });
+/* =========================================
+   KONFIGURASI SUPABASE
+   GANTI DENGAN DATA PROYEK ANDA
+========================================= */
 
-  document.querySelectorAll('.menu button').forEach(item => {
-    item.classList.remove('active');
-  });
+const SUPABASE_URL = "https://janxyyhnbsrplcepyrgb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_sb6G7BjiUIseKwUeg3gtIA_11vdxJoO";
 
-  document.getElementById(pageId).classList.add('active');
+/* =========================================
+   INISIALISASI
+========================================= */
 
-  if (button) {
-    button.classList.add('active');
+const loginPanel = document.getElementById("loginPanel");
+const loginMessage = document.getElementById("loginMessage");
+const loginButton = document.getElementById("loginButton");
+const app = document.getElementById("app");
+const pageContent = document.getElementById("pageContent");
+
+let supabaseClient = null;
+let currentProfile = null;
+let itemsData = [];
+let batchesData = [];
+
+/* =========================================
+   VALIDASI DAN KONEKSI
+========================================= */
+
+function initializeSupabase() {
+  if (
+    SUPABASE_URL.includes("MASUKKAN_") ||
+    SUPABASE_KEY.includes("MASUKKAN_")
+  ) {
+    loginMessage.textContent =
+      "Konfigurasi Supabase belum diisi pada index.html.";
+    return false;
   }
 
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  try {
+    const url = new URL(SUPABASE_URL);
+
+    if (
+      url.protocol !== "https:" ||
+      !url.hostname.endsWith(".supabase.co") ||
+      url.pathname !== "/"
+    ) {
+      loginMessage.textContent =
+        "Project URL tidak valid. Periksa Settings > API di Supabase.";
+      return false;
+    }
+
+    supabaseClient = window.supabase.createClient(
+      SUPABASE_URL.replace(/\/+$/, ""),
+      SUPABASE_KEY
+    );
+
+    return true;
+  } catch (error) {
+    loginMessage.textContent = "Project URL tidak valid.";
+    return false;
+  }
 }
-</script>
-<!-- LOGIN SIM PERSEDIAAN FARMASI -->
-<div id="loginPanel" style="
-  position:fixed; inset:0; z-index:9999;
-  background:#f1f5f9; display:flex;
-  align-items:center; justify-content:center;
-  font-family:Arial,sans-serif; padding:20px;
-">
-  <div style="
-    background:white; padding:30px; border-radius:14px;
-    width:100%; max-width:380px;
-    box-shadow:0 5px 25px #0002;
-  ">
-    <h2 style="margin-top:0;color:#123b65">SIM Persediaan Farmasi</h2>
-    <p style="color:#64748b">Klinik RSAL Kodaeral XIV</p>
 
-    <label>Email</label>
-    <input id="loginEmail" type="email" placeholder="Email pengguna"
-      style="width:100%;padding:12px;margin:8px 0 15px;box-sizing:border-box">
+/* =========================================
+   LOGIN
+========================================= */
 
-    <label>Password</label>
-    <input id="loginPassword" type="password" placeholder="Password"
-      style="width:100%;padding:12px;margin:8px 0 15px;box-sizing:border-box">
+document.getElementById("loginForm").addEventListener(
+  "submit",
+  async function(event) {
+    event.preventDefault();
 
-    <button id="loginButton" onclick="loginUser()"
-      style="width:100%;padding:12px;background:#123b65;color:white;
-      border:0;border-radius:7px;cursor:pointer">
-      LOGIN
-    </button>
+    if (!supabaseClient) return;
 
-    <p id="loginMessage" style="color:#dc2626;font-size:13px"></p>
-  </div>
-</div>
+    const email = document.getElementById("loginEmail")
+      .value.trim();
 
-<div id="userInfo" style="
-  display:none; padding:10px 16px;
-  background:#eaf2f8; color:#123b65;
-  font-family:Arial,sans-serif;
-">
-  <span id="userName"></span>
-  <span id="userRole"></span>
-  <button onclick="logoutUser()" style="float:right">Logout</button>
-</div>
+    const password = document.getElementById("loginPassword")
+      .value;
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    loginMessage.textContent = "";
+    loginButton.disabled = true;
+    loginButton.textContent = "Memproses...";
 
-<script>
-  // GANTI DENGAN PROJECT URL DAN PUBLISHABLE KEY MILIK ANDA
-  const SUPABASE_URL = "https://janxyyhnbsrplcepyrgb.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_sb6G7BjiUIseKwUeg3gtIA_11vdxJoO";
-
-  const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
-  async function loginUser() {
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
-    const message = document.getElementById("loginMessage");
-    const button = document.getElementById("loginButton");
-
-    message.textContent = "";
-    button.disabled = true;
-    button.textContent = "Memproses...";
-
-    const { data, error } = await supabaseClient.auth.signInWithPassword({
-      email,
-      password
-    });
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
 
     if (error) {
-      message.textContent = "Login gagal: " + error.message;
-      button.disabled = false;
-      button.textContent = "LOGIN";
+      loginMessage.textContent =
+        "Login gagal: " + error.message;
+
+      loginButton.disabled = false;
+      loginButton.textContent = "LOGIN";
       return;
     }
 
     await loadUserProfile(data.user);
   }
+);
 
-  async function loadUserProfile(user) {
-    const { data: profile, error } = await supabaseClient
-      .from("profiles")
-      .select("full_name, role")
-      .eq("id", user.id)
-      .single();
+/* =========================================
+   PROFIL PENGGUNA
+========================================= */
 
-    if (error || !profile) {
-      document.getElementById("loginMessage").textContent =
-        "Profil pengguna tidak ditemukan atau tidak dapat dibaca.";
-      await supabaseClient.auth.signOut();
-      document.getElementById("loginButton").disabled = false;
-      document.getElementById("loginButton").textContent = "LOGIN";
-      return;
-    }
+async function loadUserProfile(user) {
+  const { data: profile, error } = await supabaseClient
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", user.id)
+    .single();
 
-    document.getElementById("loginPanel").style.display = "none";
-    document.getElementById("userInfo").style.display = "block";
-    document.getElementById("userName").textContent =
-      "Pengguna: " + profile.full_name + " | ";
-    document.getElementById("userRole").textContent =
-      "Role: " + profile.role;
+  if (error || !profile) {
+    loginMessage.textContent =
+      "Profil pengguna tidak ditemukan atau tidak dapat dibaca. Hubungi Admin.";
+
+    await supabaseClient.auth.signOut();
+
+    loginButton.disabled = false;
+    loginButton.textContent = "LOGIN";
+    return;
   }
 
-  async function logoutUser() {
+  currentProfile = profile;
+
+  document.getElementById("userName").textContent =
+    profile.full_name || user.email;
+
+  document.getElementById("userRole").textContent =
+    (profile.role || "staff").toUpperCase();
+
+  loginPanel.style.display = "none";
+  app.style.display = "block";
+
+  await loadDashboardData();
+  showPage("dashboard");
+}
+
+/* =========================================
+   PEMBACAAN DATA
+========================================= */
+
+async function loadDashboardData() {
+  pageContent.innerHTML =
+    '<div class="empty">Memuat data dari Supabase...</div>';
+
+  const [itemsResult, batchesResult] = await Promise.all([
+    supabaseClient.from("items").select("*"),
+    supabaseClient.from("stock_batches").select("*")
+  ]);
+
+  if (itemsResult.error || batchesResult.error) {
+    const err = itemsResult.error || batchesResult.error;
+
+    pageContent.innerHTML = `
+      <div class="panel">
+        <h3>Gagal membaca data</h3>
+        <p class="muted">${escapeHTML(err.message)}</p>
+        <button class="refresh-btn" onclick="loadDashboardData()">
+          Coba Lagi
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  itemsData = itemsResult.data || [];
+  batchesData = batchesResult.data || [];
+}
+
+/* =========================================
+   FORMAT DAN KEAMANAN TAMPILAN
+========================================= */
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  })[char]);
+}
+
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString("id-ID");
+}
+
+function getItemName(item) {
+  return item.name || item.item_name ||
+    item.nama_barang || item.description ||
+    item.code || item.id || "-";
+}
+
+function getQuantity(batch) {
+  return Number(
+    batch.quantity ??
+    batch.qty ??
+    batch.stock ??
+    batch.balance ??
+    0
+  );
+}
+
+/* =========================================
+   DASHBOARD
+========================================= */
+
+function renderDashboard() {
+  const totalItems = itemsData.length;
+  const totalBatches = batchesData.length;
+
+  const totalStock = batchesData.reduce(
+    (sum, batch) => sum + getQuantity(batch), 0
+  );
+
+  pageContent.innerHTML = `
+    <div class="page-heading">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Ringkasan persediaan farmasi</p>
+      </div>
+      <button class="refresh-btn" onclick="refreshData()">
+        ↻ Refresh Data
+      </button>
+    </div>
+
+    <div class="notice">
+      Data ditampilkan berdasarkan tabel Supabase yang dapat
+      diakses oleh akun Anda. Fitur transaksi belum diaktifkan.
+    </div>
+
+    <div class="cards">
+      <div class="stat-card">
+        <div class="label">Jumlah Master Barang</div>
+        <div class="number">${formatNumber(totalItems)}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Jumlah Batch</div>
+        <div class="number">${formatNumber(totalBatches)}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Total Kuantitas Batch</div>
+        <div class="number">${formatNumber(totalStock)}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Status Sistem</div>
+        <div class="number" style="font-size:20px;color:var(--green)">
+          Terhubung
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Status Koneksi Database</h3>
+      <p><span class="status">Terhubung ke Supabase</span></p>
+      <p class="muted">
+        Login: ${escapeHTML(currentProfile?.full_name || "-")}
+      </p>
+      <p class="muted">
+        Role: ${escapeHTML(currentProfile?.role || "-")}
+      </p>
+    </div>
+
+    <div class="panel">
+      <h3>Master Barang Terbaru</h3>
+      ${renderItemsTable(itemsData.slice(0, 10))}
+    </div>
+  `;
+}
+
+/* =========================================
+   MASTER BARANG
+========================================= */
+
+function renderItemsTable(data) {
+  if (!data.length) {
+    return '<div class="empty">Belum ada data barang.</div>';
+  }
+
+  const columns = Object.keys(data[0]).slice(0, 6);
+
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            ${columns.map(col =>
+              `<th>${escapeHTML(col)}</th>`
+            ).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(row => `
+            <tr>
+              ${columns.map(col =>
+                `<td>${escapeHTML(row[col])}</td>`
+              ).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderItems() {
+  pageContent.innerHTML = `
+    <div class="page-heading">
+      <div>
+        <h1>Master Barang</h1>
+        <p>Data barang dari database Supabase</p>
+      </div>
+      <button class="refresh-btn" onclick="refreshData()">
+        ↻ Refresh
+      </button>
+    </div>
+
+    <div class="panel">
+      <h3>Daftar Master Barang (${itemsData.length})</h3>
+      ${renderItemsTable(itemsData)}
+    </div>
+  `;
+}
+
+/* =========================================
+   STOK PER BATCH
+========================================= */
+
+function renderBatches() {
+  pageContent.innerHTML = `
+    <div class="page-heading">
+      <div>
+        <h1>Stok per Batch</h1>
+        <p>Data batch persediaan dari Supabase</p>
+      </div>
+      <button class="refresh-btn" onclick="refreshData()">
+        ↻ Refresh
+      </button>
+    </div>
+
+    <div class="panel">
+      <h3>Daftar Batch (${batchesData.length})</h3>
+      ${renderItemsTable(batchesData)}
+    </div>
+  `;
+}
+
+/* =========================================
+   MENU PERSIAPAN
+========================================= */
+
+const futurePages = {
+  receipts: {
+    title: "Penerimaan Barang",
+    description: "Pencatatan penerimaan barang dari pemasok."
+  },
+  issues: {
+    title: "Pengeluaran Barang",
+    description: "Pencatatan pengeluaran dan distribusi barang."
+  },
+  recap: {
+    title: "Rekap Pengeluaran",
+    description: "Laporan pengeluaran berdasarkan periode."
+  },
+  cards: {
+    title: "Kartu Stok",
+    description: "Riwayat mutasi masuk, keluar, dan saldo stok."
+  },
+  stocktake: {
+    title: "Stok Opname",
+    description: "Pencocokan stok fisik dengan stok sistem."
+  },
+  settings: {
+    title: "Pengaturan",
+    description: "Pengaturan akun dan sistem."
+  }
+};
+
+function renderFuturePage(page) {
+  const config = futurePages[page];
+
+  pageContent.innerHTML = `
+    <div class="page-heading">
+      <div>
+        <h1>${config.title}</h1>
+        <p>${config.description}</p>
+      </div>
+    </div>
+
+    <div class="notice">
+      Modul ini masih dalam tahap pengembangan.
+      Belum tersedia pencatatan atau perubahan transaksi.
+    </div>
+
+    <div class="panel">
+      <h3>${config.title}</h3>
+      <div class="empty">
+        Fitur akan diaktifkan setelah koneksi database,
+        hak akses, dan alur transaksi selesai disiapkan.
+      </div>
+    </div>
+  `;
+}
+
+/* =========================================
+   NAVIGASI
+========================================= */
+
+function showPage(page) {
+  document.querySelectorAll(".nav-btn").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.page === page
+    );
+  });
+
+  if (page === "dashboard") renderDashboard();
+  else if (page === "items") renderItems();
+  else if (page === "batches") renderBatches();
+  else if (futurePages[page]) renderFuturePage(page);
+}
+
+document.querySelectorAll(".nav-btn").forEach(button => {
+  button.addEventListener("click", () => {
+    showPage(button.dataset.page);
+  });
+});
+
+/* =========================================
+   REFRESH
+========================================= */
+
+async function refreshData() {
+  await loadDashboardData();
+
+  if (pageContent.innerHTML.includes("Gagal membaca data")) {
+    return;
+  }
+
+  const activePage = document.querySelector(
+    ".nav-btn.active"
+  )?.dataset.page || "dashboard";
+
+  showPage(activePage);
+}
+
+/* =========================================
+   LOGOUT DAN PEMERIKSAAN SESI
+========================================= */
+
+document.getElementById("logoutButton").addEventListener(
+  "click",
+  async function() {
     await supabaseClient.auth.signOut();
     location.reload();
   }
+);
 
-  async function checkSession() {
-    const { data } = await supabaseClient.auth.getSession();
+async function checkSession() {
+  if (!initializeSupabase()) return;
 
-    if (data.session) {
-      await loadUserProfile(data.session.user);
-    }
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    loginMessage.textContent = error.message;
+    return;
   }
 
-  checkSession();
+  if (data.session) {
+    await loadUserProfile(data.session.user);
+  }
+}
+
+checkSession();
+
 </script>
+</body>
+</html>
