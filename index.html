@@ -1,530 +1,323 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Tracking Invoice Sorong - Dashboard & Logistics System</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- JsBarcode CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .active-kpi {
-            ring: 2px solid #2563eb;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
-            transform: translateY(-2px);
-        }
-        @keyframes scanLaser {
-            0% { top: 10%; }
-            50% { top: 90%; }
-            100% { top: 10%; }
-        }
-        .laser-line {
-            animation: scanLaser 2s infinite ease-in-out;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIM Persediaan Farmasi | Klinik RSAL Kodaeral XIV</title>
+<style>
+:root {
+  --navy:#12345a;
+  --blue:#1769aa;
+  --bg:#f3f6fa;
+  --white:#fff;
+  --text:#243247;
+  --muted:#718096;
+  --border:#e4eaf1;
+  --green:#15966b;
+  --orange:#e99a25;
+  --red:#d94b4b;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:250px;background:var(--navy);color:white;padding:22px 14px;flex-shrink:0}
+.brand{padding:8px 12px 24px;border-bottom:1px solid #ffffff25}
+.brand h2{font-size:17px;margin:0 0 7px}
+.brand p{font-size:11px;color:#c7d8eb;margin:0;line-height:1.5}
+.menu-label{font-size:10px;color:#9db5d0;margin:24px 12px 10px;text-transform:uppercase;letter-spacing:1px}
+.menu button{display:flex;width:100%;border:0;background:transparent;color:#d8e5f3;padding:12px;border-radius:8px;text-align:left;margin:3px 0;cursor:pointer;font-size:13px}
+.menu button:hover,.menu button.active{background:#ffffff20;color:white}
+.main{flex:1;min-width:0}
+.topbar{height:68px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.topbar strong{font-size:14px}
+.user{font-size:12px;color:var(--muted)}
+.content{padding:28px;max-width:1450px;margin:auto}
+.page-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}
+.page-title h1{font-size:23px;margin:0 0 6px}
+.page-title p{font-size:12px;color:var(--muted);margin:0}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.card{background:white;padding:20px;border:1px solid var(--border);border-radius:12px}
+.card small{color:var(--muted);font-size:12px}
+.card h2{font-size:25px;margin:12px 0 5px}
+.card p{font-size:11px;color:var(--muted);margin:0}
+.panel{background:white;border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.panel h3{font-size:15px;margin:0 0 16px}
+.grid-two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:12px 10px;border-bottom:1px solid var(--border);text-align:left}
+th{color:var(--muted);font-weight:600;background:#f8fafc}
+.badge{padding:5px 8px;border-radius:20px;font-size:10px;background:#e8f7ef;color:var(--green)}
+.badge.warning{background:#fff3df;color:#b7791f}
+.badge.danger{background:#fdeaea;color:var(--red)}
+button.primary{background:var(--blue);color:white;border:0;padding:10px 15px;border-radius:7px;cursor:pointer}
+button.secondary{background:#edf3f9;color:var(--navy);border:0;padding:10px 15px;border-radius:7px;cursor:pointer}
+.search{padding:10px;border:1px solid var(--border);border-radius:7px;width:240px;max-width:100%}
+.toolbar{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:15px}
+.page{display:none}
+.page.active{display:block}
+.notice{font-size:12px;color:#8a641d;background:#fff7e7;padding:12px;border-radius:8px;margin-bottom:18px;line-height:1.6}
+.empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
+.footer{text-align:center;color:var(--muted);font-size:10px;padding:20px}
+.mobile-menu{display:none}
+@media(max-width:900px){
+ .sidebar{width:210px}
+ .cards{grid-template-columns:repeat(2,1fr)}
+ .content{padding:20px}
+}
+@media(max-width:650px){
+ .layout{display:block}
+ .sidebar{width:100%;padding:12px}
+ .brand{padding:8px 10px 12px}
+ .menu-label{margin:12px 10px 6px}
+ .menu{display:grid;grid-template-columns:repeat(2,1fr);gap:3px}
+ .menu button{font-size:11px;padding:10px}
+ .topbar{height:55px;padding:0 15px}
+ .content{padding:15px}
+ .cards{gap:9px}
+ .card{padding:13px}
+ .card h2{font-size:20px}
+ .grid-two{grid-template-columns:1fr}
+ .page-title h1{font-size:19px}
+ .table-wrap{overflow-x:auto}
+ table{min-width:600px}
+ .search{width:100%}
+}
+</style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800">
+<body>
+<div class="layout">
 
-    <!-- Header / Navbar -->
-    <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-truck-ramp-box"></i> E-Tracking Invoice Sorong
-                </h1>
-                <p class="text-xs text-blue-100">Monitoring Logistik & Integrasi Data Penjualan Farmasi</p>
-            </div>
-            
-            <div class="flex items-center gap-3">
-                <button onclick="loadDataFromSheets()" id="btn-sync" class="bg-blue-800 hover:bg-blue-900 px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 border border-blue-500 transition-all">
-                    <i class="fa-solid fa-rotate" id="sync-icon"></i> Sinkronkan Google Sheets
-                </button>
-                <div class="bg-blue-800/80 px-3 py-2 rounded-lg text-xs border border-blue-600">
-                    <span id="sync-time" class="text-blue-200">Terakhir: 03/11/2026</span>
-                </div>
-            </div>
+<aside class="sidebar">
+  <div class="brand">
+    <h2>SIM FARMASI</h2>
+    <p>KLINIK RSAL KODAERAL XIV<br>Sistem Informasi Persediaan</p>
+  </div>
+
+  <div class="menu-label">Menu Utama</div>
+  <nav class="menu">
+    <button class="active" onclick="showPage('overview',this)">▦ Dashboard</button>
+    <button onclick="showPage('master',this)">▤ Master Barang</button>
+    <button onclick="showPage('penerimaan',this)">↓ Penerimaan</button>
+    <button onclick="showPage('pengeluaran',this)">↑ Pengeluaran</button>
+    <button onclick="showPage('rekap',this)">▥ Rekap Pengeluaran</button>
+    <button onclick="showPage('kartu',this)">▧ Kartu Stok</button>
+    <button onclick="showPage('opname',this)">☷ Stok Opname</button>
+  </nav>
+
+  <div class="menu-label">Sistem</div>
+  <nav class="menu">
+    <button onclick="showPage('pengaturan',this)">⚙ Pengaturan</button>
+  </nav>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <strong>SIM Persediaan Farmasi</strong>
+    <span class="user">Klinik RSAL Kodaeral XIV</span>
+  </header>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section id="overview" class="page active">
+      <div class="page-title">
+        <div>
+          <h1>Dashboard Persediaan</h1>
+          <p>Ringkasan persediaan farmasi</p>
         </div>
-    </header>
+        <span class="badge warning">MODE DEMO</span>
+      </div>
 
-    <!-- Main Content Container -->
-    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <div class="notice">
+        Data pada halaman ini adalah data contoh, bukan data stok aktual.
+        Hubungkan aplikasi ke Supabase sebelum digunakan untuk operasional.
+      </div>
 
-        <!-- Barcode Scanner & Driver Input Portal -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-barcode text-blue-600"></i> Portal Driver: Scan & Konfirmasi Faktur
-                </h2>
-                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-                    <i class="fa-solid fa-bolt mr-1"></i> Mode Cepat Lapangan
-                </span>
-            </div>
+      <div class="cards">
+        <div class="card">
+          <small>Total Jenis Barang</small>
+          <h2>125</h2>
+          <p>Contoh data barang</p>
+        </div>
+        <div class="card">
+          <small>Total Stok</small>
+          <h2>3.450</h2>
+          <p>Contoh kuantitas barang</p>
+        </div>
+        <div class="card">
+          <small>Stok Menipis</small>
+          <h2>08</h2>
+          <p>Perlu pemeriksaan</p>
+        </div>
+        <div class="card">
+          <small>Segera Kedaluwarsa</small>
+          <h2>05</h2>
+          <p>Contoh barang mendekati ED</p>
+        </div>
+      </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Barcode Input / Scanner Box -->
-                <div class="bg-slate-900 text-white rounded-xl p-5 flex flex-col justify-between relative overflow-hidden">
-                    <div class="absolute inset-0 bg-blue-500/10 pointer-events-none"></div>
-                    <div>
-                        <label class="block text-xs text-slate-400 font-semibold mb-2">MASUKKAN / PILIH NO. BILLING</label>
-                        <div class="relative mb-3">
-                            <input type="text" id="scan-input" placeholder="Ketik No. Billing..." oninput="handleManualInput(this.value)"
-                                   class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
-                            <button onclick="searchBilling()" class="absolute right-2 top-2 text-slate-400 hover:text-white">
-                                <i class="fa-solid fa-magnifying-glass"></i>
-                            </button>
-                        </div>
+      <div class="grid-two">
+        <div class="panel">
+          <h3>Daftar Stok Menipis</h3>
+          <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nama Barang</th><th>Stok</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Paracetamol 500 mg</td><td>12</td><td><span class="badge warning">Menipis</span></td></tr>
+              <tr><td>Amoxicillin 500 mg</td><td>8</td><td><span class="badge danger">Kritis</span></td></tr>
+              <tr><td>CTM 4 mg</td><td>15</td><td><span class="badge warning">Menipis</span></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>Monitoring Kedaluwarsa</h3>
+          <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nama Barang</th><th>Batch</th><th>ED</th></tr></thead>
+            <tbody>
+              <tr><td>Vitamin C</td><td>VC001</td><td><span class="badge warning">Des 2026</span></td></tr>
+              <tr><td>Antasida</td><td>AT002</td><td><span class="badge warning">Jan 2027</span></td></tr>
+              <tr><td>Ibuprofen</td><td>IB003</td><td><span class="badge">Jun 2027</span></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+    </section>
 
-                        <!-- Visual Barcode & Laser Scanner Animation -->
-                        <div class="bg-white p-3 rounded-lg border border-slate-700 flex flex-col items-center justify-center relative overflow-hidden min-h-[80px]">
-                            <div class="absolute inset-x-0 h-0.5 bg-red-500 shadow-[0_0_8px_#ef4444] laser-line z-10"></div>
-                            <svg id="barcode-display" class="w-full max-h-16"></svg>
-                        </div>
-                    </div>
-                    
-                    <div class="my-3 border-t border-slate-800 pt-3">
-                        <p class="text-xs text-slate-400 mb-2">Pilih Cepat No. Billing:</p>
-                        <div class="flex flex-wrap gap-1.5" id="billing-pills">
-                            <!-- Pills loaded dynamically -->
-                        </div>
-                    </div>
+    <!-- MASTER BARANG -->
+    <section id="master" class="page">
+      <div class="page-title">
+        <div><h1>Master Barang</h1><p>Daftar identitas obat dan perbekalan farmasi</p></div>
+        <button class="primary" onclick="alert('Form master barang akan diaktifkan setelah koneksi database dibuat.')">+ Tambah Barang</button>
+      </div>
+      <div class="panel">
+        <div class="toolbar">
+          <input class="search" placeholder="Cari kode atau nama barang...">
+          <button class="secondary" onclick="alert('Fitur impor akan diaktifkan setelah database terhubung.')">Impor Data</button>
+        </div>
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Kode</th><th>Nama Barang</th><th>Satuan</th><th>Stok Minimum</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>OBT001</td><td>Paracetamol 500 mg</td><td>Tablet</td><td>50</td><td><span class="badge">Aktif</span></td></tr>
+            <tr><td>OBT002</td><td>Amoxicillin 500 mg</td><td>Kapsul</td><td>30</td><td><span class="badge">Aktif</span></td></tr>
+            <tr><td>OBT003</td><td>Vitamin C 500 mg</td><td>Tablet</td><td>20</td><td><span class="badge">Aktif</span></td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </section>
 
-                    <div class="text-xs text-slate-400 flex items-center justify-between">
-                        <span>Status Sistem: <span class="text-emerald-400 font-semibold">Online</span></span>
-                        <i class="fa-solid fa-shield-check text-lg text-emerald-400"></i>
-                    </div>
-                </div>
+    <!-- PENERIMAAN -->
+    <section id="penerimaan" class="page">
+      <div class="page-title">
+        <div><h1>Penerimaan Barang</h1><p>Pencatatan barang masuk berdasarkan batch</p></div>
+        <button class="primary" onclick="alert('Form penerimaan akan diaktifkan setelah database terhubung.')">+ Penerimaan Baru</button>
+      </div>
+      <div class="panel">
+        <div class="notice">Setiap penerimaan nantinya wajib mencatat nomor surat jalan, tanggal, sumber barang, nama barang, jumlah, satuan, nomor batch, dan tanggal kedaluwarsa.</div>
+        <div class="empty">Belum ada transaksi penerimaan yang tersimpan.</div>
+      </div>
+    </section>
 
-                <!-- Logistics Confirmation Form -->
-                <div class="lg:col-span-2 bg-slate-50 p-5 rounded-xl border border-slate-200">
-                    <form id="tracking-form" onsubmit="updateTrackingData(event)" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Outlet / Ship to Party</label>
-                                <input type="text" id="form-outlet" readonly placeholder="Pilih No. Billing..." class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Salesman</label>
-                                <input type="text" id="form-salesman" readonly placeholder="-" class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Komersil (Rp)</label>
-                                <input type="text" id="form-komersil" readonly placeholder="Rp 0" class="w-full bg-slate-200 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-700 font-bold">
-                            </div>
-                        </div>
+    <!-- PENGELUARAN -->
+    <section id="pengeluaran" class="page">
+      <div class="page-title">
+        <div><h1>Pengeluaran Obat</h1><p>Pencatatan pengeluaran berdasarkan resep</p></div>
+        <button class="primary" onclick="alert('Form pengeluaran akan diaktifkan setelah database terhubung.')">+ Pengeluaran Baru</button>
+      </div>
+      <div class="panel">
+        <div class="notice">Form transaksi nantinya mencakup tanggal, dokter, pasien, nomor rekam medis, informasi penjamin, nama obat, jumlah, batch, dan kedaluwarsa. Pemilihan batch akan mengikuti prinsip FEFO.</div>
+        <div class="empty">Belum ada transaksi pengeluaran yang tersimpan.</div>
+      </div>
+    </section>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 border-t border-slate-200 pt-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Tgl Pengiriman [Kol K]</label>
-                                <input type="date" id="form-tgl-kirim" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Date Receive [Kol L]</label>
-                                <input type="date" id="form-tgl-terima" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-1 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Foto SP/Dok [Kol M]</label>
-                                <input type="file" id="form-sp" accept="image/*" capture="environment" class="w-full bg-white border border-slate-300 rounded-lg px-2 py-1 text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">Status Dok [Kol N]</label>
-                                <select id="form-status" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold">
-                                    <option value="DONE">DONE (Selesai)</option>
-                                    <option value="BELUM DIKIRIM">BELUM DIKIRIM</option>
-                                </select>
-                            </div>
-                        </div>
+    <!-- REKAP -->
+    <section id="rekap" class="page">
+      <div class="page-title">
+        <div><h1>Rekap Pengeluaran</h1><p>Ringkasan pengeluaran obat harian dan periodik</p></div>
+        <button class="secondary" onclick="window.print()">Cetak Halaman</button>
+      </div>
+      <div class="panel">
+        <div class="toolbar">
+          <input type="date" class="search" aria-label="Tanggal awal">
+          <input type="date" class="search" aria-label="Tanggal akhir">
+        </div>
+        <div class="empty">Rekap akan tampil setelah transaksi pengeluaran tersimpan.</div>
+      </div>
+    </section>
 
-                        <div class="flex justify-between items-center pt-2">
-                            <span id="form-message" class="text-xs text-emerald-600 font-medium"></span>
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-sm">
-                                <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan & Update Tracking
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
+    <!-- KARTU STOK -->
+    <section id="kartu" class="page">
+      <div class="page-title">
+        <div><h1>Kartu Stok</h1><p>Mutasi persediaan per barang dan per batch</p></div>
+      </div>
+      <div class="panel">
+        <div class="toolbar">
+          <input class="search" placeholder="Cari nama atau kode barang...">
+          <button class="secondary" onclick="alert('Kartu stok akan tersedia setelah database terhubung.')">Tampilkan</button>
+        </div>
+        <div class="empty">Pilih barang untuk melihat riwayat masuk, keluar, saldo, batch, dan kedaluwarsa.</div>
+      </div>
+    </section>
 
-        <!-- KPI Clickable Filter Cards Grid -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div onclick="filterKPI('ALL')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Komersil</p>
-                <h3 class="text-xl font-extrabold text-slate-900 mt-1" id="kpi-total-komersil">Rp 0</h3>
-                <span class="text-[11px] text-blue-600 font-medium">Invoices Total</span>
-            </div>
+    <!-- OPNAME -->
+    <section id="opname" class="page">
+      <div class="page-title">
+        <div><h1>Stok Opname</h1><p>Pencocokan stok sistem dengan stok fisik</p></div>
+        <button class="primary" onclick="alert('Form stok opname akan diaktifkan setelah database terhubung.')">+ Sesi Opname</button>
+      </div>
+      <div class="panel">
+        <div class="notice">Stok opname nantinya mencatat stok sistem, stok fisik, selisih, alasan koreksi, petugas pemeriksa, dan persetujuan pejabat berwenang.</div>
+        <div class="empty">Belum ada sesi stok opname.</div>
+      </div>
+    </section>
 
-            <div onclick="filterKPI('DONE')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pengiriman DONE</p>
-                <h3 class="text-xl font-extrabold text-emerald-600 mt-1" id="kpi-done-count">0</h3>
-                <span class="text-[11px] text-slate-500">Klik untuk Filter</span>
-            </div>
+    <!-- PENGATURAN -->
+    <section id="pengaturan" class="page">
+      <div class="page-title">
+        <div><h1>Pengaturan</h1><p>Konfigurasi aplikasi dan pengguna</p></div>
+      </div>
+      <div class="panel">
+        <h3>Informasi Sistem</h3>
+        <p style="font-size:13px;line-height:1.8">
+          <b>Nama:</b> SIM Persediaan Farmasi<br>
+          <b>Unit:</b> Klinik RSAL Kodaeral XIV<br>
+          <b>Database:</b> Supabase (belum terhubung)<br>
+          <b>Hosting:</b> GitHub Pages
+        </p>
+        <div class="notice">Manajemen akun, hak akses, audit log, dan konfigurasi database akan ditambahkan pada tahap berikutnya.</div>
+      </div>
+    </section>
 
-            <div onclick="filterKPI('PENDING')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-amber-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">In Transit / Pending</p>
-                <h3 class="text-xl font-extrabold text-amber-600 mt-1" id="kpi-pending-count">0</h3>
-                <span class="text-[11px] text-amber-700 font-semibold bg-amber-50 px-1.5 py-0.5 rounded">Proses Driver</span>
-            </div>
+    <div class="footer">
+      SIM Persediaan Farmasi Klinik RSAL Kodaeral XIV
+    </div>
+  </div>
+</main>
+</div>
 
-            <div onclick="filterKPI('ADA SP')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-indigo-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ada Foto SP</p>
-                <h3 class="text-xl font-extrabold text-indigo-600 mt-1" id="kpi-sp-ada">0</h3>
-                <span class="text-[11px] text-indigo-700 font-semibold bg-indigo-50 px-1.5 py-0.5 rounded">Dokumen OK</span>
-            </div>
+<script>
+function showPage(pageId, button) {
+  document.querySelectorAll('.page').forEach(page => {
+    page.classList.remove('active');
+  });
 
-            <div onclick="filterKPI('TIDAK ADA SP')" class="kpi-card cursor-pointer bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-rose-400 transition-all">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tanpa SP</p>
-                <h3 class="text-xl font-extrabold text-rose-600 mt-1" id="kpi-sp-tidak">0</h3>
-                <span class="text-[11px] text-rose-700 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">Perlu Cek</span>
-            </div>
-        </section>
+  document.querySelectorAll('.menu button').forEach(item => {
+    item.classList.remove('active');
+  });
 
-        <!-- Charts Section -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-column text-blue-600"></i> Nominal Komersil per Salesman
-                </h3>
-                <div class="h-64 relative">
-                    <canvas id="chart-salesman"></canvas>
-                </div>
-            </div>
+  document.getElementById(pageId).classList.add('active');
 
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-chart-pie text-indigo-600"></i> Distribusi Barang & Expedisi
-                </h3>
-                <div class="h-64 relative flex justify-center">
-                    <canvas id="chart-expedisi"></canvas>
-                </div>
-            </div>
-        </section>
+  if (button) {
+    button.classList.add('active');
+  }
 
-        <!-- Master Data Table Section -->
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-table-list text-blue-600"></i> Master Data Tracking Invoice
-                    </h3>
-                    <p class="text-xs text-slate-500" id="active-filter-label">Memuat data dari Google Spreadsheet...</p>
-                </div>
-                
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    <input type="text" id="table-search" oninput="renderTable()" placeholder="Cari Outlet, No Billing, Sales..." class="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs w-full md:w-64">
-                    <button onclick="filterKPI('ALL')" class="bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700">Reset</button>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
-                            <th class="p-3">No. Billing</th>
-                            <th class="p-3">Tanggal</th>
-                            <th class="p-3">Ship to Party (Outlet)</th>
-                            <th class="p-3">Kota</th>
-                            <th class="p-3">Salesman</th>
-                            <th class="p-3 text-right">Komersil (Rp)</th>
-                            <th class="p-3">Barang</th>
-                            <th class="p-3">Tgl Kirim (Kol K)</th>
-                            <th class="p-3">Date Receive (Kol L)</th>
-                            <th class="p-3 text-center">Fisik SP/Foto (Kol M)</th>
-                            <th class="p-3 text-center">Status Dok (Kol N)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="invoice-tbody" class="divide-y divide-slate-100">
-                        <!-- Rows rendered dynamically -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- App Script -->
-    <script>
-        let invoiceData = [];
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxwzNSar-DdKqzOsgmVailbJVACq8k9P2Aaq7jvVrrlhWT_dilGIiEuyKKseIckNIIpiQ/exec";
-
-        let activeFilter = 'ALL';
-        let salesmanChart, expedisiChart;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDataFromSheets();
-        });
-
-        function loadDataFromSheets() {
-            const icon = document.getElementById('sync-icon');
-            icon.classList.add('fa-spin');
-            
-            fetch(WEB_APP_URL)
-                .then(response => response.json())
-                .then(data => {
-                    invoiceData = data;
-                    icon.classList.remove('fa-spin');
-                    const now = new Date();
-                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                    document.getElementById('sync-time').innerText = `Terakhir: ${timeStr} WIT`;
-                    
-                    renderBillingPills();
-                    updateKPIs();
-                    if (!salesmanChart) {
-                        initCharts();
-                    } else {
-                        updateCharts();
-                    }
-                    renderTable();
-                    if(invoiceData.length > 0) generateBarcodeVisual(invoiceData[0].NoBilling);
-                })
-                .catch(error => {
-                    console.error("Gagal memuat data:", error);
-                    icon.classList.remove('fa-spin');
-                    alert('Gagal mengambil data dari Google Spreadsheet.');
-                });
-        }
-
-        function formatRp(amount) {
-            return 'Rp ' + Number(amount || 0).toLocaleString('id-ID');
-        }
-
-        function renderBillingPills() {
-            const container = document.getElementById('billing-pills');
-            const sampleBillings = invoiceData.slice(0, 6);
-            container.innerHTML = sampleBillings.map(item => `
-                <button onclick="selectBilling('${item.NoBilling}')" class="bg-slate-800 hover:bg-slate-700 text-blue-300 px-2.5 py-1 rounded text-xs font-medium">
-                    #${item.NoBilling.slice(-6)}
-                </button>
-            `).join('');
-        }
-
-        function selectBilling(noBilling) {
-            document.getElementById('scan-input').value = noBilling;
-            searchBilling();
-        }
-
-        function handleManualInput(val) {
-            if(val.length >= 6) {
-                generateBarcodeVisual(val);
-                searchBilling();
-            }
-        }
-
-        function generateBarcodeVisual(code) {
-            try {
-                JsBarcode("#barcode-display", code, {
-                    format: "CODE128",
-                    lineColor: "#0f172a",
-                    width: 2,
-                    height: 42,
-                    displayValue: true,
-                    fontSize: 11,
-                    margin: 0
-                });
-            } catch (e) {
-                console.error("Barcode generation error", e);
-            }
-        }
-
-        function searchBilling() {
-            const query = document.getElementById('scan-input').value.trim();
-            const item = invoiceData.find(i => i.NoBilling === query || i.NoBilling.endsWith(query));
-            
-            if (item) {
-                document.getElementById('scan-input').value = item.NoBilling;
-                generateBarcodeVisual(item.NoBilling);
-                document.getElementById('form-outlet').value = item.ShipTo;
-                document.getElementById('form-salesman').value = item.Salesman;
-                document.getElementById('form-komersil').value = formatRp(item.Komersil);
-                document.getElementById('form-tgl-kirim').value = item.TglKirim ? formatDateForInput(item.TglKirim) : '';
-                document.getElementById('form-tgl-terima').value = item.DateReceive ? formatDateForInput(item.DateReceive) : '';
-                document.getElementById('form-status').value = item.Dokumentasi === 'DONE' ? 'DONE' : 'BELUM DIKIRIM';
-                document.getElementById('form-message').innerText = `✅ Ditemukan: ${item.ShipTo}`;
-            } else {
-                document.getElementById('form-message').innerText = 'Faktur tidak ditemukan.';
-            }
-        }
-
-        function formatDateForInput(dateStr) {
-            if (!dateStr) return '';
-            const parts = dateStr.split('/');
-            if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
-            return dateStr;
-        }
-
-        function updateTrackingData(e) {
-            e.preventDefault();
-            const noBilling = document.getElementById('scan-input').value.trim();
-            const index = invoiceData.findIndex(i => i.NoBilling === noBilling);
-
-            if (index !== -1) {
-                const tglKirim = document.getElementById('form-tgl-kirim').value;
-                const tglTerima = document.getElementById('form-tgl-terima').value;
-                
-                const fileInput = document.getElementById('form-sp');
-                let statusSP = invoiceData[index].SP || '';
-                if (fileInput.files && fileInput.files[0]) {
-                    statusSP = "Foto: " + fileInput.files[0].name;
-                }
-
-                const statusDok = document.getElementById('form-status').value;
-
-                invoiceData[index].TglKirim = tglKirim;
-                invoiceData[index].DateReceive = tglTerima;
-                invoiceData[index].SP = statusSP;
-                invoiceData[index].Dokumentasi = statusDok;
-
-                document.getElementById('form-message').innerText = '⏳ Menyimpan ke Google Spreadsheet...';
-
-                fetch(WEB_APP_URL, {
-                    method: "POST",
-                    mode: "no-cors",
-                    body: JSON.stringify({
-                        NoBilling: noBilling,
-                        TglKirim: tglKirim,
-                        DateReceive: tglTerima,
-                        SP: statusSP,
-                        Dokumentasi: statusDok
-                    })
-                }).then(() => {
-                    document.getElementById('form-message').innerText = `✅ Data #${noBilling} berhasil diperbarui di Spreadsheet!`;
-                    updateKPIs();
-                    updateCharts();
-                    renderTable();
-                }).catch(error => {
-                    console.error("Error:", error);
-                    document.getElementById('form-message').innerText = '⚠️ Gagal menyinkronkan ke Spreadsheet.';
-                });
-
-            } else {
-                alert('Pilih atau masukkan No. Billing terlebih dahulu!');
-            }
-        }
-
-        function updateKPIs() {
-            const totalKomersil = invoiceData.reduce((acc, curr) => acc + (curr.Komersil || 0), 0);
-            const doneCount = invoiceData.filter(i => i.Dokumentasi === 'DONE').length;
-            const pendingCount = invoiceData.filter(i => i.Dokumentasi !== 'DONE').length;
-            const adaSP = invoiceData.filter(i => i.SP && i.SP !== '').length;
-            const tidakSP = invoiceData.filter(i => !i.SP || i.SP === '').length;
-
-            document.getElementById('kpi-total-komersil').innerText = formatRp(totalKomersil);
-            document.getElementById('kpi-done-count').innerText = doneCount;
-            document.getElementById('kpi-pending-count').innerText = pendingCount;
-            document.getElementById('kpi-sp-ada').innerText = adaSP;
-            document.getElementById('kpi-sp-tidak').innerText = tidakSP;
-        }
-
-        function filterKPI(type) {
-            activeFilter = type;
-            document.querySelectorAll('.kpi-card').forEach(card => card.classList.remove('active-kpi'));
-
-            const filterLabel = document.getElementById('active-filter-label');
-            if (type === 'ALL') {
-                filterLabel.innerText = `Menampilkan Seluruh Data (${invoiceData.length} Faktur)`;
-            } else {
-                filterLabel.innerText = `Filter Aktif: ${type}`;
-            }
-
-            renderTable();
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('invoice-tbody');
-            const search = document.getElementById('table-search').value.toLowerCase();
-
-            let filtered = invoiceData.filter(item => {
-                const matchesSearch = item.ShipTo.toLowerCase().includes(search) || 
-                                      item.NoBilling.includes(search) || 
-                                      item.Salesman.toLowerCase().includes(search);
-                
-                if (activeFilter === 'ALL') return matchesSearch;
-                if (activeFilter === 'DONE') return matchesSearch && item.Dokumentasi === 'DONE';
-                if (activeFilter === 'PENDING') return matchesSearch && item.Dokumentasi !== 'DONE';
-                if (activeFilter === 'ADA SP') return matchesSearch && (item.SP && item.SP !== '');
-                if (activeFilter === 'TIDAK ADA SP') return matchesSearch && (!item.SP || item.SP === '');
-                return matchesSearch;
-            });
-
-            tbody.innerHTML = filtered.map(item => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-3 font-mono font-bold text-blue-600">#${item.NoBilling}</td>
-                    <td class="p-3 text-slate-500">${item.BillingDate}</td>
-                    <td class="p-3 font-semibold text-slate-800">${item.ShipTo}</td>
-                    <td class="p-3 text-slate-600">${item.Kota}</td>
-                    <td class="p-3 text-slate-600">${item.Salesman.split(' ')[0]}</td>
-                    <td class="p-3 text-right font-bold text-slate-800">${formatRp(item.Komersil)}</td>
-                    <td class="p-3 text-slate-600">${item.Barang}</td>
-                    <td class="p-3 text-slate-500">${item.TglKirim || '-'}</td>
-                    <td class="p-3 text-slate-500">${item.DateReceive || '-'}</td>
-                    <td class="p-3 text-center text-slate-600 truncate max-w-[120px]">${item.SP || '-'}</td>
-                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.Dokumentasi === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${item.Dokumentasi}</span></td>
-                </tr>
-            `).join('');
-            
-            document.getElementById('active-filter-label').innerText = `Menampilkan ${filtered.length} dari ${invoiceData.length} Faktur`;
-        }
-
-        function initCharts() {
-            const ctxSalesman = document.getElementById('chart-salesman').getContext('2d');
-            salesmanChart = new Chart(ctxSalesman, {
-                type: 'bar',
-                data: getSalesmanChartData(),
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-
-            const ctxExpedisi = document.getElementById('chart-expedisi').getContext('2d');
-            expedisiChart = new Chart(ctxExpedisi, {
-                type: 'doughnut',
-                data: getBarangChartData(),
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function getSalesmanChartData() {
-            const salesmanTotals = {};
-            invoiceData.forEach(item => {
-                const name = item.Salesman ? item.Salesman.split(' ')[0] : 'LAINNYA';
-                salesmanTotals[name] = (salesmanTotals[name] || 0) + (item.Komersil || 0);
-            });
-
-            return {
-                labels: Object.keys(salesmanTotals),
-                datasets: [{
-                    label: 'Nominal Komersil (Rp)',
-                    data: Object.values(salesmanTotals),
-                    backgroundColor: '#2563eb',
-                    borderRadius: 6
-                }]
-            };
-        }
-
-        function getBarangChartData() {
-            const barangTotals = {};
-            invoiceData.forEach(item => {
-                const brg = item.Barang || 'LAINNYA';
-                barangTotals[brg] = (barangTotals[brg] || 0) + 1;
-            });
-
-            return {
-                labels: Object.keys(barangTotals),
-                datasets: [{
-                    data: Object.values(barangTotals),
-                    backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#ef4444']
-                }]
-            };
-        }
-
-        function updateCharts() {
-            salesmanChart.data = getSalesmanChartData();
-            salesmanChart.update();
-            expedisiChart.data = getBarangChartData();
-            expedisiChart.update();
-        }
-    </script>
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
 </body>
 </html>
