@@ -137,6 +137,36 @@ th{color:var(--muted);background:#f8fafc}
   display:block;width:100%;margin-top:6px;padding:10px;
   border:1px solid var(--border);border-radius:7px
 }
+.unit-info{
+  margin-top:7px;
+  padding:9px 10px;
+  background:#edf5fc;
+  border-radius:7px;
+  color:var(--navy);
+  font-size:12px;
+  min-height:34px
+}
+.quantity-preview{
+  margin-top:7px;
+  padding:9px 10px;
+  background:#e8f6ef;
+  color:#16845b;
+  border-radius:7px;
+  font-size:12px;
+  font-weight:bold;
+  min-height:34px
+}
+.receipt-detail{
+  font-size:12px;
+  line-height:1.7;
+  min-width:220px
+}
+.receipt-detail-item{
+  padding:5px 0;
+  border-bottom:1px dashed var(--border)
+}
+.receipt-detail-item:last-child{border-bottom:0}
+
 @media(max-width:900px){
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sidebar{width:195px}
@@ -235,6 +265,11 @@ function escapeHTML(value) {
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString("id-ID");
+}
+
+function formatQuantity(value, unit) {
+  const quantity = formatNumber(value);
+  return unit ? `${quantity} ${unit}` : quantity;
 }
 
 function showLoginError(message) {
@@ -718,7 +753,7 @@ function renderBatches() {
               <td>${escapeHTML(item.item_name||"Barang tidak ditemukan")}</td>
               <td>${escapeHTML(batch.batch_number||"-")}</td>
               <td>${formatExpiry(batch.expiry)}</td>
-              <td><strong>${formatNumber(batch.quantity)}</strong></td>
+              <td><strong>${escapeHTML(formatQuantity(batch.quantity,item.unit))}</strong></td>
               <td>${escapeHTML(item.unit||"-")}</td>
               <td><span class="status" style="${style}">${status.label}</span></td>
             </tr>`;
@@ -745,6 +780,7 @@ function receiptItemOptions() {
   `).join("");
 }
 
+/* FORM DETAIL BARANG DENGAN SATUAN OTOMATIS */
 function addReceiptLine() {
   const container=$("receiptLines");
   const row=document.createElement("div");
@@ -755,21 +791,77 @@ function addReceiptLine() {
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
       <label>Nama Barang
         <select class="r-item" required>
-          <option value="">Pilih barang</option>${receiptItemOptions()}
+          <option value="">Pilih barang</option>
+          ${receiptItemOptions()}
         </select>
+        <div class="unit-info r-unit-info">Pilih barang untuk melihat satuan.</div>
       </label>
-      <label>Nomor Batch<input class="r-batch" required></label>
-      <label>Tanggal Kedaluwarsa<input class="r-expiry" type="date" required></label>
-      <label>Jumlah<input class="r-quantity" type="number" min="0.01" step="any" required></label>
-      <label>Harga Satuan (Rp)<input class="r-price" type="number" min="0" step="any" required></label>
+
+      <label>Nomor Batch
+        <input class="r-batch" required placeholder="Nomor batch">
+      </label>
+
+      <label>Tanggal Kedaluwarsa
+        <input class="r-expiry" type="date" required>
+      </label>
+
+      <label class="r-quantity-label">Jumlah
+        <input class="r-quantity" type="number" min="0.01" step="any" required placeholder="Masukkan jumlah">
+        <div class="quantity-preview r-quantity-preview">Preview jumlah akan tampil di sini.</div>
+      </label>
+
+      <label>Harga Satuan (Rp)
+        <input class="r-price" type="number" min="0" step="any" required placeholder="Harga per satuan">
+      </label>
     </div>
+
     <button type="button" class="refresh-btn r-remove" style="margin-top:10px">Hapus Barang</button>
   `;
 
   container.appendChild(row);
+
+  const itemSelect=row.querySelector(".r-item");
+  const quantityInput=row.querySelector(".r-quantity");
+  const unitInfo=row.querySelector(".r-unit-info");
+  const quantityLabel=row.querySelector(".r-quantity-label");
+  const quantityPreview=row.querySelector(".r-quantity-preview");
+
+  function updateUnitDisplay() {
+    const selectedItem=itemsData.find(item=>item.id===itemSelect.value);
+    const unit=selectedItem?.unit?.trim()||"Satuan belum diisi";
+
+    unitInfo.textContent="Satuan: "+unit;
+    quantityLabel.firstChild.textContent="Jumlah ("+unit+")";
+
+    updateQuantityPreview();
+  }
+
+  function updateQuantityPreview() {
+    const selectedItem=itemsData.find(item=>item.id===itemSelect.value);
+    const unit=selectedItem?.unit?.trim()||"";
+    const quantity=quantityInput.value;
+
+    if (!selectedItem || quantity==="") {
+      quantityPreview.textContent="Preview jumlah akan tampil di sini.";
+      return;
+    }
+
+    const numericQuantity=Number(quantity);
+    if (!Number.isFinite(numericQuantity) || numericQuantity<=0) {
+      quantityPreview.textContent="Masukkan jumlah yang valid.";
+      return;
+    }
+
+    quantityPreview.textContent="Jumlah diterima: "+formatQuantity(numericQuantity,unit);
+  }
+
+  itemSelect.addEventListener("change",updateUnitDisplay);
+  quantityInput.addEventListener("input",updateQuantityPreview);
+
   row.querySelector(".r-remove").addEventListener("click",()=>row.remove());
 }
 
+/* RIWAYAT PENERIMAAN BESERTA DETAIL BARANG */
 async function loadReceiptHistory() {
   const target=$("receiptHistory");
   if (!target) return;
@@ -791,16 +883,75 @@ async function loadReceiptHistory() {
     return;
   }
 
+  /* Mengambil detail transaksi */
+  const receiptIds=data.map(receipt=>receipt.id);
+
+  const {data:lines,error:linesError}=await supabaseClient
+    .from("goods_receipt_lines")
+    .select("id,receipt_id,item_id,batch_number,expiry_date,quantity")
+    .in("receipt_id",receiptIds);
+
+  const itemMap=Object.fromEntries(itemsData.map(item=>[item.id,item]));
+
+  const linesByReceipt={};
+
+  if (!linesError && lines) {
+    lines.forEach(line=>{
+      if (!linesByReceipt[line.receipt_id]) {
+        linesByReceipt[line.receipt_id]=[];
+      }
+      linesByReceipt[line.receipt_id].push(line);
+    });
+  }
+
   target.innerHTML=`
+    ${linesError?`
+      <div class="notice">
+        Riwayat penerimaan berhasil dibaca, tetapi detail barang belum dapat ditampilkan.
+        Keterangan: ${escapeHTML(linesError.message)}
+      </div>
+    `:""}
+
     <div class="table-wrap"><table>
-      <thead><tr><th>No. Penerimaan</th><th>Tanggal</th><th>Pemasok</th><th>Catatan</th></tr></thead>
-      <tbody>${data.map(receipt=>`
+      <thead>
         <tr>
-          <td>${escapeHTML(receipt.receipt_number)}</td>
-          <td>${escapeHTML(receipt.receipt_date)}</td>
-          <td>${escapeHTML(receipt.supplier||"-")}</td>
-          <td>${escapeHTML(receipt.notes||"-")}</td>
-        </tr>`).join("")}
+          <th>No. Penerimaan</th>
+          <th>Tanggal</th>
+          <th>Pemasok</th>
+          <th>Detail Barang</th>
+          <th>Catatan</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${data.map(receipt=>{
+          const receiptLines=linesByReceipt[receipt.id]||[];
+
+          const detailHTML=receiptLines.length
+            ? receiptLines.map(line=>{
+                const item=itemMap[line.item_id];
+                const itemName=item?.item_name||"Barang tidak ditemukan";
+                const unit=item?.unit||"";
+                return `
+                  <div class="receipt-detail-item">
+                    <strong>${escapeHTML(itemName)}</strong><br>
+                    Jumlah: ${escapeHTML(formatQuantity(line.quantity,unit))}<br>
+                    Batch: ${escapeHTML(line.batch_number||"-")}<br>
+                    ED: ${escapeHTML(formatExpiry(line.expiry_date))}
+                  </div>
+                `;
+              }).join("")
+            : '<span class="muted">Detail tidak tersedia</span>';
+
+          return `
+            <tr>
+              <td><strong>${escapeHTML(receipt.receipt_number)}</strong></td>
+              <td>${escapeHTML(formatExpiry(receipt.receipt_date))}</td>
+              <td>${escapeHTML(receipt.supplier||"-")}</td>
+              <td><div class="receipt-detail">${detailHTML}</div></td>
+              <td>${escapeHTML(receipt.notes||"-")}</td>
+            </tr>
+          `;
+        }).join("")}
       </tbody>
     </table></div>
   `;
@@ -823,21 +974,33 @@ async function renderReceipts() {
             <label>Nomor Faktur / Penerimaan
               <input id="receiptNumber" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
+
             <label>Tanggal Penerimaan
               <input id="receiptDate" type="date" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
+
             <label>Nama Pemasok
               <input id="receiptSupplier" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
+
             <label>Catatan
               <input id="receiptNotes" style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
           </div>
+
           <hr style="margin:20px 0">
           <h3>Detail Barang</h3>
+
+          <div class="notice">
+            Pilih barang terlebih dahulu. Satuan akan mengikuti satuan yang sudah tercatat pada Master Barang.
+          </div>
+
           <div id="receiptLines"></div>
+
           <button type="button" class="refresh-btn" id="addReceiptLine">+ Tambah Barang</button>
+
           <hr style="margin:20px 0">
+
           <button type="submit" class="primary-btn" id="saveReceipt">Simpan Penerimaan</button>
           <div id="receiptMessage" style="margin-top:12px"></div>
         </form>
@@ -853,6 +1016,7 @@ async function renderReceipts() {
   if (isAdmin) {
     $("receiptDate").value=new Date().toLocaleDateString("en-CA");
     addReceiptLine();
+
     $("addReceiptLine").addEventListener("click",addReceiptLine);
 
     $("receiptForm").addEventListener("submit",async event=>{
@@ -890,6 +1054,11 @@ async function renderReceipts() {
         return;
       }
 
+      if (!$("receiptDate").value) {
+        message.textContent="Tanggal penerimaan wajib diisi.";
+        return;
+      }
+
       if (!confirm("Apakah data penerimaan sudah benar dan akan disimpan?")) return;
 
       button.disabled=true;
@@ -915,6 +1084,7 @@ async function renderReceipts() {
 
         await loadDashboardData();
         await loadReceiptHistory();
+
       } catch(error) {
         message.textContent="Gagal menyimpan penerimaan: "+error.message;
       } finally {
