@@ -319,5 +319,122 @@ function showPage(pageId, button) {
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 </script>
-</body>
-</html>
+<!-- LOGIN SIM PERSEDIAAN FARMASI -->
+<div id="loginPanel" style="
+  position:fixed; inset:0; z-index:9999;
+  background:#f1f5f9; display:flex;
+  align-items:center; justify-content:center;
+  font-family:Arial,sans-serif; padding:20px;
+">
+  <div style="
+    background:white; padding:30px; border-radius:14px;
+    width:100%; max-width:380px;
+    box-shadow:0 5px 25px #0002;
+  ">
+    <h2 style="margin-top:0;color:#123b65">SIM Persediaan Farmasi</h2>
+    <p style="color:#64748b">Klinik RSAL Kodaeral XIV</p>
+
+    <label>Email</label>
+    <input id="loginEmail" type="email" placeholder="Email pengguna"
+      style="width:100%;padding:12px;margin:8px 0 15px;box-sizing:border-box">
+
+    <label>Password</label>
+    <input id="loginPassword" type="password" placeholder="Password"
+      style="width:100%;padding:12px;margin:8px 0 15px;box-sizing:border-box">
+
+    <button id="loginButton" onclick="loginUser()"
+      style="width:100%;padding:12px;background:#123b65;color:white;
+      border:0;border-radius:7px;cursor:pointer">
+      LOGIN
+    </button>
+
+    <p id="loginMessage" style="color:#dc2626;font-size:13px"></p>
+  </div>
+</div>
+
+<div id="userInfo" style="
+  display:none; padding:10px 16px;
+  background:#eaf2f8; color:#123b65;
+  font-family:Arial,sans-serif;
+">
+  <span id="userName"></span>
+  <span id="userRole"></span>
+  <button onclick="logoutUser()" style="float:right">Logout</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  // GANTI DENGAN PROJECT URL DAN PUBLISHABLE KEY MILIK ANDA
+  const SUPABASE_URL = "https://janxyyhnbsrplcepyrgb.supabase.co/rest/v1/";
+  const SUPABASE_KEY = "sb_publishable_sb6G7BjiUIseKwUeg3gtIA_11vdxJoO";
+
+  const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  async function loginUser() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const message = document.getElementById("loginMessage");
+    const button = document.getElementById("loginButton");
+
+    message.textContent = "";
+    button.disabled = true;
+    button.textContent = "Memproses...";
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) {
+      message.textContent = "Login gagal: " + error.message;
+      button.disabled = false;
+      button.textContent = "LOGIN";
+      return;
+    }
+
+    await loadUserProfile(data.user);
+  }
+
+  async function loadUserProfile(user) {
+    const { data: profile, error } = await supabaseClient
+      .from("profiles")
+      .select("full_name, role")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !profile) {
+      document.getElementById("loginMessage").textContent =
+        "Profil pengguna tidak ditemukan atau tidak dapat dibaca.";
+      await supabaseClient.auth.signOut();
+      document.getElementById("loginButton").disabled = false;
+      document.getElementById("loginButton").textContent = "LOGIN";
+      return;
+    }
+
+    document.getElementById("loginPanel").style.display = "none";
+    document.getElementById("userInfo").style.display = "block";
+    document.getElementById("userName").textContent =
+      "Pengguna: " + profile.full_name + " | ";
+    document.getElementById("userRole").textContent =
+      "Role: " + profile.role;
+  }
+
+  async function logoutUser() {
+    await supabaseClient.auth.signOut();
+    location.reload();
+  }
+
+  async function checkSession() {
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+      await loadUserProfile(data.session.user);
+    }
+  }
+
+  checkSession();
+</script>
