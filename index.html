@@ -757,23 +757,319 @@ function renderItemsTable(data) {
   `;
 }
 
+/* =========================================
+   MASTER BARANG - TAMBAH, UBAH, CARI
+========================================= */
+
+let editingItemId = null;
+
 function renderItems() {
+  const isAdmin = currentProfile?.role === "admin";
+
   pageContent.innerHTML = `
     <div class="page-heading">
       <div>
         <h1>Master Barang</h1>
-        <p>Data barang dari database Supabase</p>
+        <p>Pengelolaan data master persediaan farmasi</p>
       </div>
-      <button class="refresh-btn" onclick="refreshData()">
-        ↻ Refresh
-      </button>
+      <button class="refresh-btn" id="refreshItems">↻ Refresh</button>
     </div>
 
+    ${isAdmin ? `
+      <div class="panel">
+        <h3 id="itemFormTitle">Tambah Barang Baru</h3>
+
+        <form id="itemForm">
+          <div class="cards" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+            <div>
+              <label>Kode Barang</label>
+              <input id="itemCode" required maxlength="50"
+                placeholder="Contoh: OB001"
+                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+            </div>
+
+            <div>
+              <label>Nama Barang</label>
+              <input id="itemName" required maxlength="200"
+                placeholder="Nama obat atau alat kesehatan"
+                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+            </div>
+
+            <div>
+              <label>Kategori</label>
+              <input id="itemCategory" maxlength="100"
+                placeholder="Contoh: Obat"
+                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+            </div>
+
+            <div>
+              <label>Satuan</label>
+              <input id="itemUnit" required maxlength="30"
+                placeholder="Contoh: Tablet, Botol, Box"
+                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+            </div>
+
+            <div>
+              <label>Stok Minimum</label>
+              <input id="itemMinimum" type="number" min="0" step="0.01"
+                value="0" required
+                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+            </div>
+          </div>
+
+          <button class="primary-btn" id="saveItemButton"
+            type="submit" style="max-width:220px">
+            Simpan Barang
+          </button>
+
+          <button type="button" class="refresh-btn"
+            id="cancelItemEdit" style="display:none">
+            Batal Ubah
+          </button>
+
+          <p id="itemMessage" class="muted"></p>
+        </form>
+      </div>
+    ` : `
+      <div class="notice">
+        Akun Staff hanya dapat melihat data Master Barang.
+        Penambahan dan perubahan data hanya dapat dilakukan Admin.
+      </div>
+    `}
+
     <div class="panel">
-      <h3>Daftar Master Barang (${itemsData.length})</h3>
-      ${renderItemsTable(itemsData)}
+      <h3>Daftar Barang (${itemsData.length})</h3>
+
+      <input id="itemSearch" type="search"
+        placeholder="Cari kode atau nama barang..."
+        style="width:100%;max-width:400px;padding:11px;margin-bottom:15px;border:1px solid var(--border);border-radius:7px">
+
+      <div id="itemsTable"></div>
     </div>
   `;
+
+  document.getElementById("refreshItems").addEventListener(
+    "click", refreshData
+  );
+
+  renderItemsTableWithActions(itemsData);
+
+  document.getElementById("itemSearch").addEventListener(
+    "input", function() {
+      const keyword = this.value.toLowerCase();
+
+      const filtered = itemsData.filter(item =>
+        String(item.item_code || "").toLowerCase().includes(keyword) ||
+        String(item.item_name || "").toLowerCase().includes(keyword) ||
+        String(item.category || "").toLowerCase().includes(keyword)
+      );
+
+      renderItemsTableWithActions(filtered);
+    }
+  );
+
+  if (isAdmin) {
+    document.getElementById("itemForm").addEventListener(
+      "submit", saveItem
+    );
+
+    document.getElementById("cancelItemEdit").addEventListener(
+      "click", resetItemForm
+    );
+  }
+}
+
+function renderItemsTableWithActions(data) {
+  const isAdmin = currentProfile?.role === "admin";
+  const container = document.getElementById("itemsTable");
+
+  if (!container) return;
+
+  if (!data.length) {
+    container.innerHTML =
+      '<div class="empty">Belum ada data barang yang sesuai.</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Kode</th>
+            <th>Nama Barang</th>
+            <th>Kategori</th>
+            <th>Satuan</th>
+            <th>Stok Minimum</th>
+            <th>Status</th>
+            ${isAdmin ? "<th>Aksi</th>" : ""}
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(item => `
+            <tr>
+              <td>${escapeHTML(item.item_code)}</td>
+              <td>${escapeHTML(item.item_name)}</td>
+              <td>${escapeHTML(item.category || "-")}</td>
+              <td>${escapeHTML(item.unit)}</td>
+              <td>${formatNumber(item.minimum_stock)}</td>
+              <td>
+                ${item.is_active
+                  ? '<span class="status">Aktif</span>'
+                  : '<span class="status" style="background:#fce8e8;color:#a22">Nonaktif</span>'}
+              </td>
+              ${isAdmin ? `
+                <td>
+                  <button class="refresh-btn"
+                    data-edit-item="${escapeHTML(item.id)}">
+                    Ubah
+                  </button>
+                  <button class="refresh-btn"
+                    data-toggle-item="${escapeHTML(item.id)}">
+                    ${item.is_active ? "Nonaktifkan" : "Aktifkan"}
+                  </button>
+                </td>
+              ` : ""}
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  container.querySelectorAll("[data-edit-item]").forEach(button => {
+    button.addEventListener("click", () => {
+      editItem(button.dataset.editItem);
+    });
+  });
+
+  container.querySelectorAll("[data-toggle-item]").forEach(button => {
+    button.addEventListener("click", () => {
+      toggleItem(button.dataset.toggleItem);
+    });
+  });
+}
+
+async function saveItem(event) {
+  event.preventDefault();
+
+  if (currentProfile?.role !== "admin") {
+    alert("Hanya Admin yang dapat mengubah Master Barang.");
+    return;
+  }
+
+  const button = document.getElementById("saveItemButton");
+  const message = document.getElementById("itemMessage");
+
+  const item = {
+    item_code: document.getElementById("itemCode").value.trim(),
+    item_name: document.getElementById("itemName").value.trim(),
+    category: document.getElementById("itemCategory").value.trim() || null,
+    unit: document.getElementById("itemUnit").value.trim(),
+    minimum_stock: Number(document.getElementById("itemMinimum").value),
+  };
+
+  if (!item.item_code || !item.item_name || !item.unit) {
+    message.textContent = "Kode, nama, dan satuan wajib diisi.";
+    return;
+  }
+
+  if (!Number.isFinite(item.minimum_stock) || item.minimum_stock < 0) {
+    message.textContent = "Stok minimum harus berupa angka nol atau lebih.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Menyimpan...";
+  message.textContent = "";
+
+  let result;
+
+  if (editingItemId) {
+    result = await supabaseClient
+      .from("items")
+      .update(item)
+      .eq("id", editingItemId);
+  } else {
+    result = await supabaseClient
+      .from("items")
+      .insert(item);
+  }
+
+  if (result.error) {
+    message.textContent = "Gagal menyimpan: " + result.error.message;
+    button.disabled = false;
+    button.textContent = editingItemId ? "Simpan Perubahan" : "Simpan Barang";
+    return;
+  }
+
+  alert(editingItemId
+    ? "Perubahan barang berhasil disimpan."
+    : "Barang baru berhasil ditambahkan.");
+
+  editingItemId = null;
+  await loadDashboardData();
+  showPage("items");
+}
+
+function editItem(id) {
+  const item = itemsData.find(row => row.id === id);
+
+  if (!item) return;
+
+  editingItemId = id;
+
+  document.getElementById("itemCode").value = item.item_code || "";
+  document.getElementById("itemName").value = item.item_name || "";
+  document.getElementById("itemCategory").value = item.category || "";
+  document.getElementById("itemUnit").value = item.unit || "";
+  document.getElementById("itemMinimum").value = item.minimum_stock || 0;
+
+  document.getElementById("itemFormTitle").textContent = "Ubah Data Barang";
+  document.getElementById("saveItemButton").textContent = "Simpan Perubahan";
+  document.getElementById("cancelItemEdit").style.display = "inline-block";
+
+  document.getElementById("itemForm").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+
+function resetItemForm() {
+  editingItemId = null;
+
+  document.getElementById("itemForm").reset();
+  document.getElementById("itemMinimum").value = 0;
+  document.getElementById("itemFormTitle").textContent = "Tambah Barang Baru";
+  document.getElementById("saveItemButton").textContent = "Simpan Barang";
+  document.getElementById("cancelItemEdit").style.display = "none";
+  document.getElementById("itemMessage").textContent = "";
+}
+
+async function toggleItem(id) {
+  if (currentProfile?.role !== "admin") return;
+
+  const item = itemsData.find(row => row.id === id);
+  if (!item) return;
+
+  const nextStatus = !item.is_active;
+
+  if (!confirm(
+    `Yakin ingin ${nextStatus ? "mengaktifkan" : "menonaktifkan"} ${item.item_name}?`
+  )) return;
+
+  const { error } = await supabaseClient
+    .from("items")
+    .update({ is_active: nextStatus })
+    .eq("id", id);
+
+  if (error) {
+    alert("Gagal mengubah status: " + error.message);
+    return;
+  }
+
+  await loadDashboardData();
+  showPage("items");
 }
 
 /* =========================================
