@@ -1,10 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SIM Persediaan Farmasi - RSAL Kodaeral XIV</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -22,142 +22,64 @@
   --orange:#d98a19;
 }
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 .hidden{display:none!important}
 
 /* LOGIN */
 #loginScreen{
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
+  min-height:100vh;display:flex;align-items:center;
+  justify-content:center;padding:20px;
   background:linear-gradient(135deg,#123b65,#1769aa);
 }
 .login-box{
-  width:100%;
-  max-width:410px;
-  background:white;
-  padding:32px;
-  border-radius:14px;
-  box-shadow:0 12px 35px #0002;
+  width:100%;max-width:410px;background:white;
+  padding:32px;border-radius:14px;box-shadow:0 12px 35px #0002;
 }
 .login-box h2{color:var(--navy);margin:0 0 8px}
 .login-box p{color:var(--muted);margin-bottom:24px}
 
 /* LAYOUT */
 .app{display:flex;min-height:100vh}
-.sidebar{
-  width:245px;
-  background:var(--navy);
-  color:white;
-  padding:20px 14px;
-  flex-shrink:0;
-}
-.brand{
-  padding:8px 10px 22px;
-  border-bottom:1px solid #ffffff30;
-  margin-bottom:18px;
-}
+.sidebar{width:245px;background:var(--navy);color:white;padding:20px 14px;flex-shrink:0}
+.brand{padding:8px 10px 22px;border-bottom:1px solid #ffffff30;margin-bottom:18px}
 .brand h2{font-size:17px;margin:0 0 6px}
 .brand small{color:#cbd9e8}
 .nav-btn{
-  width:100%;
-  border:0;
-  color:#e5edf5;
-  background:transparent;
-  padding:12px;
-  text-align:left;
-  border-radius:7px;
-  margin:3px 0;
-  font-size:14px;
+  width:100%;border:0;color:#e5edf5;background:transparent;
+  padding:12px;text-align:left;border-radius:7px;margin:3px 0;font-size:14px;
 }
-.nav-btn:hover,.nav-btn.active{
-  background:#ffffff20;
-  color:white;
-}
+.nav-btn:hover,.nav-btn.active{background:#ffffff20;color:white}
 .nav-btn span{display:inline-block;width:25px}
 .main{flex:1;min-width:0}
 .topbar{
-  background:white;
-  border-bottom:1px solid var(--border);
-  padding:15px 22px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
+  background:white;border-bottom:1px solid var(--border);
+  padding:15px 22px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;
 }
 .topbar strong{color:var(--navy)}
 .user-info{font-size:13px;color:var(--muted)}
 .content{padding:22px;max-width:1600px;margin:auto}
 .page-title{margin:0 0 18px;color:var(--navy);font-size:22px}
-.panel{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:17px;
-  margin-bottom:18px;
-}
+.panel{background:white;border:1px solid var(--border);border-radius:10px;padding:17px;margin-bottom:18px}
 .panel h3{margin:0 0 15px;color:var(--navy);font-size:16px}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  gap:15px;
-}
-.kpi{
-  background:white;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:18px;
-}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px}
+.kpi{background:white;border:1px solid var(--border);border-radius:10px;padding:18px}
 .kpi small{color:var(--muted)}
-.kpi strong{
-  display:block;
-  color:var(--navy);
-  font-size:25px;
-  margin-top:9px;
-}
+.kpi strong{display:block;color:var(--navy);font-size:25px;margin-top:9px}
 .kpi.warning strong{color:var(--orange)}
 .kpi.danger strong{color:var(--red)}
 
 /* FORM */
-.form-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  gap:13px;
-}
-label{
-  display:block;
-  font-size:13px;
-  font-weight:600;
-  color:#46566a;
-}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}
+label{display:block;font-size:13px;font-weight:600;color:#46566a}
 input,select,textarea{
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  border:1px solid #ccd6e2;
-  border-radius:6px;
-  background:white;
-  color:var(--text);
+  width:100%;padding:10px;margin-top:6px;border:1px solid #ccd6e2;
+  border-radius:6px;background:white;color:var(--text);
 }
 textarea{min-height:75px;resize:vertical}
-.btn{
-  border:0;
-  border-radius:6px;
-  padding:10px 15px;
-  color:white;
-  background:var(--blue);
-  font-weight:600;
-  margin:4px 3px 4px 0;
-}
+.btn{border:0;border-radius:6px;padding:10px 15px;color:white;background:var(--blue);font-weight:600;margin:4px 3px 4px 0}
 .btn:hover{filter:brightness(.94)}
 .btn.secondary{background:#64748b}
 .btn.success{background:var(--green)}
@@ -166,51 +88,38 @@ textarea{min-height:75px;resize:vertical}
 .btn.small{padding:6px 9px;font-size:12px}
 .actions{margin-top:14px}
 .table-wrap{overflow-x:auto}
-table{
-  width:100%;
-  border-collapse:collapse;
-  min-width:650px;
-  font-size:13px;
-}
-th,td{
-  padding:11px 10px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
-  white-space:nowrap;
-}
+table{width:100%;border-collapse:collapse;min-width:650px;font-size:13px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
 th{background:#f0f5fa;color:var(--navy)}
 .empty{text-align:center;color:var(--muted);padding:25px}
-.status{
-  display:inline-block;
-  border-radius:20px;
-  padding:4px 9px;
-  font-size:11px;
-  background:#e7f5ed;
-  color:var(--green);
-}
+.status{display:inline-block;border-radius:20px;padding:4px 9px;font-size:11px;background:#e7f5ed;color:var(--green)}
 .status.warning{background:#fff3d9;color:#a36a0d}
 .status.danger{background:#fde8e8;color:var(--red)}
-.notice{
-  background:#fff8e8;
-  border:1px solid #f1d99e;
-  color:#795b1c;
-  padding:12px;
-  border-radius:7px;
-  margin-bottom:15px;
-  font-size:13px;
-}
-.receipt-line{
-  border:1px solid var(--border);
-  padding:12px;
-  border-radius:8px;
-  margin-bottom:10px;
-}
+.notice{background:#fff8e8;border:1px solid #f1d99e;color:#795b1c;padding:12px;border-radius:7px;margin-bottom:15px;font-size:13px}
+.receipt-line{border:1px solid var(--border);padding:12px;border-radius:8px;margin-bottom:10px}
 .unit-info{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* KARTU STOK */
+.stock-summary{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+.stock-summary-card{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:14px;
+  background:#f8fafc;
+}
+.stock-summary-card small{display:block;color:var(--muted);font-size:12px}
+.stock-summary-card strong{display:block;color:var(--navy);font-size:21px;margin-top:7px}
+.movement-in{color:var(--green);font-weight:700}
+.movement-out{color:var(--red);font-weight:700}
+.balance-cell{font-weight:700;color:var(--navy)}
 .mobile-menu{display:none}
 
-@media(max-width:850px){
-  .sidebar{width:205px}
-}
+@media(max-width:850px){.sidebar{width:205px}}
 @media(max-width:650px){
   .app{display:block}
   .sidebar{width:100%;padding:10px}
@@ -225,12 +134,10 @@ th{background:#f0f5fa;color:var(--navy)}
 
 <body>
 
-<!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
     <h2>SIM Persediaan Farmasi</h2>
     <p>RSAL Kodaeral XIV</p>
-
     <form id="loginForm">
       <label>Email
         <input id="loginEmail" type="email" required autocomplete="username">
@@ -242,20 +149,16 @@ th{background:#f0f5fa;color:var(--navy)}
       <br>
       <button class="btn" type="submit" style="width:100%">Login</button>
     </form>
-
     <div id="loginMessage" style="color:#d33b3b;font-size:13px;margin-top:12px"></div>
   </div>
 </div>
 
-<!-- APPLICATION -->
 <div id="appScreen" class="app hidden">
-
   <aside class="sidebar">
     <div class="brand">
       <h2>SIM FARMASI</h2>
       <small>RSAL Kodaeral XIV</small>
     </div>
-
     <div class="nav-list">
       <button class="nav-btn active" data-page="dashboard"><span>▦</span>Dashboard</button>
       <button class="nav-btn" data-page="items"><span>▤</span>Master Barang</button>
@@ -277,56 +180,36 @@ th{background:#f0f5fa;color:var(--navy)}
         <button class="btn danger small" onclick="logout()">Keluar</button>
       </div>
     </div>
-
     <div class="content" id="pageContent"></div>
   </main>
 </div>
 
 <script>
-/* =====================================================
-   1. KONFIGURASI SUPABASE
-===================================================== */
+/* 1. KONFIGURASI SUPABASE */
+const SUPABASE_URL="https://janxyyhnbsrplcepyrgb.supabase.co";
+const SUPABASE_KEY="sb_publishable_sb6G7BjiUIseKwUeg3gtIA_11vdxJoO";
 
-const SUPABASE_URL = "https://janxyyhnbsrplcepyrgb.supabase.co";
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-/* Ganti dengan Publishable Key dari Supabase Dashboard */
-const SUPABASE_KEY = "sb_publishable_sb6G7BjiUIseKwUeg3gtIA_11vdxJoO";
+let currentUser=null;
+let currentProfile=null;
+let items=[];
+let batches=[];
+let currentPage="dashboard";
+let receiptEditId=null;
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
-let currentUser = null;
-let currentProfile = null;
-let items = [];
-let batches = [];
-let currentPage = "dashboard";
-let receiptEditId = null;
-
-/* =====================================================
-   2. FUNGSI UMUM
-===================================================== */
-
-function el(id){
-  return document.getElementById(id);
-}
+/* 2. FUNGSI UMUM */
+function el(id){return document.getElementById(id)}
 
 function escapeHTML(value){
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
+  return String(value??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   })[c]);
 }
 
 function rupiah(value){
   return new Intl.NumberFormat("id-ID",{
-    style:"currency",
-    currency:"IDR",
-    maximumFractionDigits:0
+    style:"currency",currency:"IDR",maximumFractionDigits:0
   }).format(Number(value)||0);
 }
 
@@ -339,69 +222,38 @@ function dateID(value){
   return new Date(value).toLocaleDateString("id-ID");
 }
 
-function isAdmin(){
-  return currentProfile?.role === "admin";
-}
-
-function showMessage(message){
-  alert(message);
-}
-
-function pageHeader(title){
-  return `<h2 class="page-title">${title}</h2>`;
-}
-
+function isAdmin(){return currentProfile?.role==="admin"}
+function showMessage(message){alert(message)}
+function pageHeader(title){return `<h2 class="page-title">${title}</h2>`}
 function emptyRow(colspan,message="Belum ada data"){
   return `<tr><td colspan="${colspan}" class="empty">${message}</td></tr>`;
 }
-
 function requireAdmin(){
-  if(!isAdmin()){
-    showMessage("Akses hanya untuk Admin.");
-    return false;
-  }
+  if(!isAdmin()){showMessage("Akses hanya untuk Admin.");return false}
   return true;
 }
 
-/* =====================================================
-   3. LOGIN DAN SESSION
-===================================================== */
-
+/* 3. LOGIN DAN SESSION */
 async function initializeApp(){
-  const {data:{session},error} =
-    await supabaseClient.auth.getSession();
-
-  if(error){
-    console.error(error);
-    return;
-  }
-
-  if(session){
-    await loadUser(session.user);
-  }
+  const {data:{session},error}=await supabaseClient.auth.getSession();
+  if(error){console.error(error);return}
+  if(session)await loadUser(session.user);
 }
 
 async function loadUser(user){
-  currentUser = user;
-
-  const {data,error} = await supabaseClient
-    .from("profiles")
-    .select("id,full_name,role")
-    .eq("id",user.id)
-    .single();
+  currentUser=user;
+  const {data,error}=await supabaseClient
+    .from("profiles").select("id,full_name,role").eq("id",user.id).single();
 
   if(error){
     showMessage("Profil pengguna tidak ditemukan: "+error.message);
     return;
   }
 
-  currentProfile = data;
-
+  currentProfile=data;
   el("loginScreen").classList.add("hidden");
   el("appScreen").classList.remove("hidden");
-
-  el("userInfo").textContent =
-    `${data.full_name || user.email} (${data.role || "user"})`;
+  el("userInfo").textContent=`${data.full_name||user.email} (${data.role||"user"})`;
 
   document.querySelectorAll('[data-page="users"]').forEach(button=>{
     button.classList.toggle("hidden",!isAdmin());
@@ -413,36 +265,20 @@ async function loadUser(user){
 
 el("loginForm").addEventListener("submit",async function(event){
   event.preventDefault();
-
   el("loginMessage").textContent="Memproses login...";
-
   const email=el("loginEmail").value.trim();
   const password=el("loginPassword").value;
 
-  const {data,error}=await supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if(error){
-    el("loginMessage").textContent="Login gagal: "+error.message;
-    return;
-  }
-
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error){el("loginMessage").textContent="Login gagal: "+error.message;return}
   await loadUser(data.user);
 });
 
 async function logout(){
   const {error}=await supabaseClient.auth.signOut();
-
-  if(error){
-    showMessage(error.message);
-    return;
-  }
-
+  if(error){showMessage(error.message);return}
   currentUser=null;
   currentProfile=null;
-
   el("appScreen").classList.add("hidden");
   el("loginScreen").classList.remove("hidden");
   el("loginPassword").value="";
@@ -455,18 +291,11 @@ supabaseClient.auth.onAuthStateChange((event,session)=>{
   }
 });
 
-/* =====================================================
-   4. DATA MASTER DAN BATCH
-===================================================== */
-
+/* 4. DATA MASTER DAN BATCH */
 async function refreshData(){
   const [itemResult,batchResult]=await Promise.all([
-    supabaseClient.from("items")
-      .select("*")
-      .order("item_name"),
-    supabaseClient.from("stock_batches")
-      .select("*")
-      .order("expiry_date")
+    supabaseClient.from("items").select("*").order("item_name"),
+    supabaseClient.from("stock_batches").select("*").order("expiry_date")
   ]);
 
   if(itemResult.error){
@@ -485,31 +314,19 @@ async function refreshData(){
   batches=batchResult.data||[];
 }
 
-function itemName(id){
-  return items.find(x=>x.id===id)?.item_name||"-";
-}
+function itemName(id){return items.find(x=>x.id===id)?.item_name||"-"}
+function itemUnit(id){return items.find(x=>x.id===id)?.unit||"-"}
 
-function itemUnit(id){
-  return items.find(x=>x.id===id)?.unit||"-";
-}
-
-/* =====================================================
-   5. NAVIGASI
-===================================================== */
-
+/* 5. NAVIGASI */
 document.querySelectorAll(".nav-btn").forEach(button=>{
-  button.addEventListener("click",()=>{
-    showPage(button.dataset.page);
-  });
+  button.addEventListener("click",()=>showPage(button.dataset.page));
 });
 
 async function showPage(page){
   currentPage=page;
-
   document.querySelectorAll(".nav-btn").forEach(button=>{
     button.classList.toggle("active",button.dataset.page===page);
   });
-
   await refreshData();
 
   if(page==="dashboard")return renderDashboard();
@@ -523,22 +340,15 @@ async function showPage(page){
   if(page==="users")return renderUsers();
 }
 
-/* =====================================================
-   6. DASHBOARD
-===================================================== */
-
+/* 6. DASHBOARD */
 function renderDashboard(){
   const totalItem=items.length;
   const totalBatch=batches.length;
-
-  const totalStock=batches.reduce((sum,b)=>
-    sum+Number(b.quantity||0),0);
+  const totalStock=batches.reduce((sum,b)=>sum+Number(b.quantity||0),0);
 
   const lowStock=items.filter(item=>{
-    const stock=batches
-      .filter(b=>b.item_id===item.id)
+    const stock=batches.filter(b=>b.item_id===item.id)
       .reduce((sum,b)=>sum+Number(b.quantity||0),0);
-
     return stock<=Number(item.minimum_stock||0);
   }).length;
 
@@ -551,114 +361,64 @@ function renderDashboard(){
 
   el("pageContent").innerHTML=`
     ${pageHeader("Dashboard")}
-
     <div class="grid">
-      <div class="kpi">
-        <small>Jumlah Master Barang</small>
-        <strong>${number(totalItem)}</strong>
-      </div>
-      <div class="kpi">
-        <small>Jumlah Batch</small>
-        <strong>${number(totalBatch)}</strong>
-      </div>
-      <div class="kpi">
-        <small>Total Stok Fisik</small>
-        <strong>${number(totalStock)}</strong>
-      </div>
-      <div class="kpi warning">
-        <small>Barang Stok Minimum</small>
-        <strong>${number(lowStock)}</strong>
-      </div>
-      <div class="kpi danger">
-        <small>Batch Kedaluwarsa ≤ 90 Hari</small>
-        <strong>${number(soon)}</strong>
-      </div>
+      <div class="kpi"><small>Jumlah Master Barang</small><strong>${number(totalItem)}</strong></div>
+      <div class="kpi"><small>Jumlah Batch</small><strong>${number(totalBatch)}</strong></div>
+      <div class="kpi"><small>Total Stok Fisik</small><strong>${number(totalStock)}</strong></div>
+      <div class="kpi warning"><small>Barang Stok Minimum</small><strong>${number(lowStock)}</strong></div>
+      <div class="kpi danger"><small>Batch Kedaluwarsa ≤ 90 Hari</small><strong>${number(soon)}</strong></div>
     </div>
-
     <div class="panel" style="margin-top:18px">
       <h3>Informasi Sistem</h3>
       <p>Selamat datang di SIM Persediaan Farmasi RSAL Kodaeral XIV.</p>
       <p>Gunakan menu di sebelah kiri untuk mengelola persediaan farmasi.</p>
       <button class="btn" onclick="showPage('batches')">Lihat Stok Batch</button>
-    </div>
-  `;
+    </div>`;
 }
 
-/* =====================================================
-   7. MASTER BARANG
-===================================================== */
-
+/* 7. MASTER BARANG */
 function renderItems(){
   el("pageContent").innerHTML=`
     ${pageHeader("Master Barang")}
-
     ${isAdmin()?`
     <div class="panel">
       <h3>Tambah Barang</h3>
       <form id="itemForm">
         <div class="form-grid">
-          <label>Kode Barang
-            <input id="itemCode" required>
-          </label>
-          <label>Nama Barang
-            <input id="itemName" required>
-          </label>
-          <label>Kategori
-            <input id="itemCategory">
-          </label>
-          <label>Satuan
-            <input id="itemUnit" required placeholder="Tablet, Strip, Botol">
-          </label>
-          <label>Stok Minimum
-            <input id="itemMinimum" type="number" min="0" value="0">
-          </label>
+          <label>Kode Barang<input id="itemCode" required></label>
+          <label>Nama Barang<input id="itemName" required></label>
+          <label>Kategori<input id="itemCategory"></label>
+          <label>Satuan<input id="itemUnit" required placeholder="Tablet, Strip, Botol"></label>
+          <label>Stok Minimum<input id="itemMinimum" type="number" min="0" value="0"></label>
         </div>
-        <div class="actions">
-          <button class="btn success">Simpan Barang</button>
-        </div>
+        <div class="actions"><button class="btn success">Simpan Barang</button></div>
       </form>
     </div>`:""}
-
     <div class="panel">
       <h3>Daftar Master Barang</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Kode</th>
-              <th>Nama Barang</th>
-              <th>Kategori</th>
-              <th>Satuan</th>
-              <th>Stok Minimum</th>
-              ${isAdmin()?"<th>Aksi</th>":""}
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>No</th><th>Kode</th><th>Nama Barang</th><th>Kategori</th>
+            <th>Satuan</th><th>Stok Minimum</th>${isAdmin()?"<th>Aksi</th>":""}
+          </tr></thead>
           <tbody>
             ${items.map((item,i)=>`
               <tr>
-                <td>${i+1}</td>
-                <td>${escapeHTML(item.item_code)}</td>
-                <td>${escapeHTML(item.item_name)}</td>
-                <td>${escapeHTML(item.category)}</td>
-                <td>${escapeHTML(item.unit)}</td>
-                <td>${number(item.minimum_stock)}</td>
-                ${isAdmin()?`
-                <td>
+                <td>${i+1}</td><td>${escapeHTML(item.item_code)}</td>
+                <td>${escapeHTML(item.item_name)}</td><td>${escapeHTML(item.category)}</td>
+                <td>${escapeHTML(item.unit)}</td><td>${number(item.minimum_stock)}</td>
+                ${isAdmin()?`<td>
                   <button class="btn small" onclick="editItem('${item.id}')">Edit</button>
                   <button class="btn danger small" onclick="deleteItem('${item.id}')">Hapus</button>
                 </td>`:""}
-              </tr>
-            `).join("")||emptyRow(isAdmin()?7:6)}
+              </tr>`).join("")||emptyRow(isAdmin()?7:6)}
           </tbody>
         </table>
       </div>
-    </div>
-  `;
+    </div>`;
 
-  if(isAdmin()){
-    el("itemForm").addEventListener("submit",saveItem);
-  }
+  if(isAdmin())el("itemForm").addEventListener("submit",saveItem);
 }
 
 async function saveItem(event){
@@ -675,77 +435,50 @@ async function saveItem(event){
   };
 
   const {error}=await supabaseClient.from("items").insert(payload);
-
-  if(error){
-    showMessage("Gagal menyimpan barang: "+error.message);
-    return;
-  }
-
+  if(error){showMessage("Gagal menyimpan barang: "+error.message);return}
   showMessage("Barang berhasil disimpan.");
   await showPage("items");
 }
 
 async function editItem(id){
   if(!requireAdmin())return;
-
   const item=items.find(x=>x.id===id);
   if(!item)return;
 
   const name=prompt("Nama barang:",item.item_name);
   if(name===null)return;
-
   const unit=prompt("Satuan:",item.unit);
   if(unit===null)return;
-
   const minimum=prompt("Stok minimum:",item.minimum_stock||0);
   if(minimum===null)return;
 
   const {error}=await supabaseClient.from("items")
-    .update({
-      item_name:name.trim(),
-      unit:unit.trim(),
-      minimum_stock:Number(minimum)
-    })
+    .update({item_name:name.trim(),unit:unit.trim(),minimum_stock:Number(minimum)})
     .eq("id",id);
 
-  if(error){
-    showMessage("Gagal mengedit barang: "+error.message);
-    return;
-  }
-
+  if(error){showMessage("Gagal mengedit barang: "+error.message);return}
   await showPage("items");
 }
 
 async function deleteItem(id){
   if(!requireAdmin())return;
-  if(!confirm("Hapus barang ini?"))return;
+  if(!confirm("Nonaktifkan barang ini?"))return;
 
   const {error}=await supabaseClient.from("items")
-    .update({is_active:false})
-    .eq("id",id);
+    .update({is_active:false}).eq("id",id);
 
-  if(error){
-    showMessage("Gagal menonaktifkan barang: "+error.message);
-    return;
-  }
-
+  if(error){showMessage("Gagal menonaktifkan barang: "+error.message);return}
   showMessage("Barang dinonaktifkan.");
   await showPage("items");
 }
 
-/* =====================================================
-   8. STOK PER BATCH
-===================================================== */
-
+/* 8. STOK PER BATCH */
 function renderBatches(){
   el("pageContent").innerHTML=`
     ${pageHeader("Stok per Batch")}
-
     <div class="panel">
       <div class="form-grid">
-        <label>Cari Barang
-          <input id="batchSearch" placeholder="Nama atau kode barang">
-        </label>
+        <label>Cari Barang<input id="batchSearch" placeholder="Nama atau kode barang"></label>
         <label>Filter Kedaluwarsa
           <select id="expiryFilter">
             <option value="">Semua</option>
@@ -756,28 +489,18 @@ function renderBatches(){
         </label>
       </div>
     </div>
-
     <div class="panel">
       <h3>Daftar Stok per Batch</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Kode Barang</th>
-              <th>Nama Barang</th>
-              <th>Nomor Batch</th>
-              <th>Kedaluwarsa</th>
-              <th>Jumlah</th>
-              <th>Satuan</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>No</th><th>Kode Barang</th><th>Nama Barang</th><th>Nomor Batch</th>
+            <th>Kedaluwarsa</th><th>Jumlah</th><th>Satuan</th><th>Status</th>
+          </tr></thead>
           <tbody id="batchTable"></tbody>
         </table>
       </div>
-    </div>
-  `;
+    </div>`;
 
   el("batchSearch").addEventListener("input",filterBatches);
   el("expiryFilter").addEventListener("change",filterBatches);
@@ -792,125 +515,80 @@ function filterBatches(){
   const data=batches.filter(b=>{
     const item=items.find(x=>x.id===b.item_id);
     const text=((item?.item_name||"")+" "+(item?.item_code||"")).toLowerCase();
-
     if(!text.includes(keyword))return false;
 
-    const days=b.expiry_date?
-      (new Date(b.expiry_date)-today)/86400000:null;
-
+    const days=b.expiry_date?(new Date(b.expiry_date)-today)/86400000:null;
     if(filter==="expired"&&!(days<0))return false;
     if(filter==="90"&&!(days>=0&&days<=90))return false;
     if(filter==="180"&&!(days>=0&&days<=180))return false;
-
     return true;
   });
 
   el("batchTable").innerHTML=data.map((b,i)=>{
-    const days=b.expiry_date?
-      Math.ceil((new Date(b.expiry_date)-today)/86400000):null;
+    const days=b.expiry_date?Math.ceil((new Date(b.expiry_date)-today)/86400000):null;
+    let status="Normal",cls="";
+    if(days!==null&&days<0){status="Kedaluwarsa";cls="danger"}
+    else if(days!==null&&days<=90){status="Segera ED";cls="warning"}
 
-    let status="Normal";
-    let cls="";
-
-    if(days!==null&&days<0){
-      status="Kedaluwarsa";
-      cls="danger";
-    }else if(days!==null&&days<=90){
-      status="Segera ED";
-      cls="warning";
-    }
-
-    return `
-      <tr>
-        <td>${i+1}</td>
-        <td>${escapeHTML(items.find(x=>x.id===b.item_id)?.item_code)}</td>
-        <td>${escapeHTML(itemName(b.item_id))}</td>
-        <td>${escapeHTML(b.batch_number)}</td>
-        <td>${dateID(b.expiry_date)}</td>
-        <td>${number(b.quantity)}</td>
-        <td>${escapeHTML(itemUnit(b.item_id))}</td>
-        <td><span class="status ${cls}">${status}</span></td>
-      </tr>
-    `;
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${escapeHTML(items.find(x=>x.id===b.item_id)?.item_code)}</td>
+      <td>${escapeHTML(itemName(b.item_id))}</td>
+      <td>${escapeHTML(b.batch_number)}</td>
+      <td>${dateID(b.expiry_date)}</td>
+      <td>${number(b.quantity)}</td>
+      <td>${escapeHTML(itemUnit(b.item_id))}</td>
+      <td><span class="status ${cls}">${status}</span></td>
+    </tr>`;
   }).join("")||emptyRow(8);
 }
 
-/* =====================================================
-   9. PENERIMAAN BARANG
-===================================================== */
-
+/* 9. PENERIMAAN BARANG */
 function receiptItemOptions(selected=""){
   return `<option value="">Pilih barang</option>`+
-    items.map(i=>`
-      <option value="${i.id}" ${i.id===selected?"selected":""}>
-        ${escapeHTML(i.item_code)} - ${escapeHTML(i.item_name)}
-      </option>
-    `).join("");
+    items.map(i=>`<option value="${i.id}" ${i.id===selected?"selected":""}>
+      ${escapeHTML(i.item_code)} - ${escapeHTML(i.item_name)}
+    </option>`).join("");
 }
 
 function renderReceipts(){
   receiptEditId=null;
-
   el("pageContent").innerHTML=`
     ${pageHeader("Penerimaan Barang")}
-
     ${isAdmin()?`
     <div class="panel">
       <h3>Input Penerimaan Barang</h3>
-
       <form id="receiptForm">
         <div class="form-grid">
-          <label>Nomor Penerimaan
-            <input id="receiptNumber" required>
-          </label>
-          <label>Tanggal Penerimaan
-            <input id="receiptDate" type="date" required value="${new Date().toISOString().slice(0,10)}">
-          </label>
-          <label>Supplier
-            <input id="receiptSupplier">
-          </label>
+          <label>Nomor Penerimaan<input id="receiptNumber" required></label>
+          <label>Tanggal Penerimaan<input id="receiptDate" type="date" required value="${new Date().toISOString().slice(0,10)}"></label>
+          <label>Supplier<input id="receiptSupplier"></label>
         </div>
-
         <br>
-        <label>Catatan
-          <textarea id="receiptNotes"></textarea>
-        </label>
-
+        <label>Catatan<textarea id="receiptNotes"></textarea></label>
         <h3 style="margin-top:20px">Detail Barang</h3>
         <div id="receiptLines"></div>
-
         <button type="button" class="btn secondary" onclick="addReceiptLine()">+ Tambah Barang</button>
-        <div class="actions">
-          <button class="btn success" type="submit">Simpan Penerimaan</button>
-        </div>
+        <div class="actions"><button class="btn success" type="submit">Simpan Penerimaan</button></div>
       </form>
     </div>`:""}
-
     <div class="panel">
       <h3>Riwayat Penerimaan</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nomor Penerimaan</th>
-              <th>Tanggal</th>
-              <th>Supplier</th>
-              <th>Catatan</th>
-              ${isAdmin()?"<th>Aksi</th>":""}
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>No</th><th>Nomor Penerimaan</th><th>Tanggal</th>
+            <th>Supplier</th><th>Catatan</th>${isAdmin()?"<th>Aksi</th>":""}
+          </tr></thead>
           <tbody id="receiptHistory"></tbody>
         </table>
       </div>
-    </div>
-  `;
+    </div>`;
 
   if(isAdmin()){
     addReceiptLine();
     el("receiptForm").addEventListener("submit",saveReceipt);
   }
-
   loadReceiptHistory();
 }
 
@@ -918,55 +596,30 @@ function addReceiptLine(data={}){
   const container=el("receiptLines");
   const row=document.createElement("div");
   row.className="receipt-line";
-
   row.innerHTML=`
     <div class="form-grid">
-      <label>Nama Barang
-        <select class="r-item" required>
-          ${receiptItemOptions(data.item_id||"")}
-        </select>
-      </label>
-      <label>Nomor Batch
-        <input class="r-batch" required value="${escapeHTML(data.batch_number||"")}">
-      </label>
-      <label>Tanggal Kedaluwarsa
-        <input class="r-expiry" type="date" required value="${escapeHTML(data.expiry_date||"")}">
-      </label>
-      <label>Jumlah
-        <input class="r-quantity" type="number" min="1" required value="${data.quantity||""}">
-      </label>
-      <label>Harga Satuan
-        <input class="r-price" type="number" min="0" value="${data.unit_price||0}">
-      </label>
+      <label>Nama Barang<select class="r-item" required>${receiptItemOptions(data.item_id||"")}</select></label>
+      <label>Nomor Batch<input class="r-batch" required value="${escapeHTML(data.batch_number||"")}"></label>
+      <label>Tanggal Kedaluwarsa<input class="r-expiry" type="date" required value="${escapeHTML(data.expiry_date||"")}"></label>
+      <label>Jumlah<input class="r-quantity" type="number" min="1" required value="${data.quantity||""}"></label>
+      <label>Harga Satuan<input class="r-price" type="number" min="0" value="${data.unit_price||0}"></label>
     </div>
-    <div class="actions">
-      <button type="button" class="btn danger small" onclick="this.closest('.receipt-line').remove()">Hapus Baris</button>
-    </div>
-  `;
-
+    <div class="actions"><button type="button" class="btn danger small" onclick="this.closest('.receipt-line').remove()">Hapus Baris</button></div>`;
   container.appendChild(row);
 }
 
 function collectReceiptLines(){
-  return [...document.querySelectorAll(".receipt-line")].map(row=>{
-    const itemId=row.querySelector(".r-item").value;
-
-    return {
-      item_id:itemId,
-      batch_number:row.querySelector(".r-batch").value.trim(),
-      expiry_date:row.querySelector(".r-expiry").value,
-      quantity:Number(row.querySelector(".r-quantity").value),
-      unit_price:Number(row.querySelector(".r-price").value||0)
-    };
-  });
+  return [...document.querySelectorAll("#receiptLines .receipt-line")].map(row=>({
+    item_id:row.querySelector(".r-item").value,
+    batch_number:row.querySelector(".r-batch").value.trim(),
+    expiry_date:row.querySelector(".r-expiry").value,
+    quantity:Number(row.querySelector(".r-quantity").value),
+    unit_price:Number(row.querySelector(".r-price").value||0)
+  }));
 }
 
 function validateReceipt(lines){
-  if(!lines.length){
-    showMessage("Tambahkan minimal satu barang.");
-    return false;
-  }
-
+  if(!lines.length){showMessage("Tambahkan minimal satu barang.");return false}
   for(const line of lines){
     if(!line.item_id||!line.batch_number||!line.expiry_date||
        !Number.isFinite(line.quantity)||line.quantity<=0){
@@ -974,14 +627,12 @@ function validateReceipt(lines){
       return false;
     }
   }
-
   return true;
 }
 
 async function saveReceipt(event){
   event.preventDefault();
   if(!requireAdmin())return;
-
   const lines=collectReceiptLines();
   if(!validateReceipt(lines))return;
 
@@ -994,141 +645,79 @@ async function saveReceipt(event){
   };
 
   const {error}=await supabaseClient.rpc("create_goods_receipt",payload);
-
-  if(error){
-    showMessage("Gagal menyimpan penerimaan: "+error.message);
-    return;
-  }
-
+  if(error){showMessage("Gagal menyimpan penerimaan: "+error.message);return}
   showMessage("Penerimaan berhasil disimpan.");
   await showPage("receipts");
 }
 
 async function loadReceiptHistory(){
-  const {data,error}=await supabaseClient
-    .from("goods_receipts")
-    .select("*")
-    .order("receipt_date",{ascending:false})
-    .limit(300);
+  const {data,error}=await supabaseClient.from("goods_receipts")
+    .select("*").order("receipt_date",{ascending:false}).limit(300);
 
-  if(error){
-    el("receiptHistory").innerHTML=emptyRow(6,error.message);
-    return;
-  }
+  if(error){el("receiptHistory").innerHTML=emptyRow(6,error.message);return}
 
   el("receiptHistory").innerHTML=(data||[]).map((r,i)=>`
     <tr>
-      <td>${i+1}</td>
-      <td>${escapeHTML(r.receipt_number)}</td>
-      <td>${dateID(r.receipt_date)}</td>
-      <td>${escapeHTML(r.supplier)}</td>
+      <td>${i+1}</td><td>${escapeHTML(r.receipt_number)}</td>
+      <td>${dateID(r.receipt_date)}</td><td>${escapeHTML(r.supplier)}</td>
       <td>${escapeHTML(r.notes)}</td>
-      ${isAdmin()?`
-      <td>
-        <button class="btn small" onclick="editReceipt('${r.id}')">Edit</button>
-      </td>`:""}
-    </tr>
-  `).join("")||emptyRow(isAdmin()?6:5);
+      ${isAdmin()?`<td><button class="btn small" onclick="editReceipt('${r.id}')">Edit</button></td>`:""}
+    </tr>`).join("")||emptyRow(isAdmin()?6:5);
 }
 
-/* =====================================================
-   10. EDIT PENERIMAAN
-===================================================== */
-
+/* 10. EDIT PENERIMAAN */
 async function editReceipt(id){
   if(!requireAdmin())return;
 
-  const {data:header,error:headerError}=await supabaseClient
-    .from("goods_receipts")
-    .select("*")
-    .eq("id",id)
-    .single();
+  const {data:header,error:headerError}=await supabaseClient.from("goods_receipts")
+    .select("*").eq("id",id).single();
 
-  if(headerError){
-    showMessage(headerError.message);
-    return;
-  }
+  if(headerError){showMessage(headerError.message);return}
 
-  const {data:lines,error:lineError}=await supabaseClient
-    .from("goods_receipt_lines")
-    .select("*")
-    .eq("receipt_id",id);
+  const {data:lines,error:lineError}=await supabaseClient.from("goods_receipt_lines")
+    .select("*").eq("receipt_id",id);
 
-  if(lineError){
-    showMessage(lineError.message);
-    return;
-  }
+  if(lineError){showMessage(lineError.message);return}
 
   receiptEditId=id;
-
   el("pageContent").innerHTML=`
     ${pageHeader("Edit Penerimaan Barang")}
-
     <div class="panel">
       <form id="editReceiptForm">
         <div class="form-grid">
-          <label>Nomor Penerimaan
-            <input id="editReceiptNumber" required value="${escapeHTML(header.receipt_number)}">
-          </label>
-          <label>Tanggal
-            <input id="editReceiptDate" type="date" required value="${header.receipt_date}">
-          </label>
-          <label>Supplier
-            <input id="editReceiptSupplier" value="${escapeHTML(header.supplier||"")}">
-          </label>
+          <label>Nomor Penerimaan<input id="editReceiptNumber" required value="${escapeHTML(header.receipt_number)}"></label>
+          <label>Tanggal<input id="editReceiptDate" type="date" required value="${header.receipt_date}"></label>
+          <label>Supplier<input id="editReceiptSupplier" value="${escapeHTML(header.supplier||"")}"></label>
         </div>
         <br>
-        <label>Catatan
-          <textarea id="editReceiptNotes">${escapeHTML(header.notes||"")}</textarea>
-        </label>
-
+        <label>Catatan<textarea id="editReceiptNotes">${escapeHTML(header.notes||"")}</textarea></label>
         <h3 style="margin-top:20px">Detail Barang</h3>
         <div id="editReceiptLines"></div>
-
         <button type="button" class="btn secondary" onclick="addEditReceiptLine()">+ Tambah Barang</button>
         <div class="actions">
           <button class="btn success">Simpan Perubahan</button>
           <button type="button" class="btn secondary" onclick="showPage('receipts')">Batal</button>
         </div>
       </form>
-    </div>
-  `;
+    </div>`;
 
   (lines||[]).forEach(line=>addEditReceiptLine(line));
   if(!lines?.length)addEditReceiptLine();
-
   el("editReceiptForm").addEventListener("submit",saveEditReceipt);
 }
 
 function addEditReceiptLine(line={}){
   const row=document.createElement("div");
   row.className="receipt-line";
-
   row.innerHTML=`
     <div class="form-grid">
-      <label>Nama Barang
-        <select class="er-item" required>
-          ${receiptItemOptions(line.item_id||"")}
-        </select>
-      </label>
-      <label>Nomor Batch
-        <input class="er-batch" required value="${escapeHTML(line.batch_number||"")}">
-      </label>
-      <label>Tanggal Kedaluwarsa
-        <input class="er-expiry" type="date" required value="${escapeHTML(line.expiry_date||"")}">
-      </label>
-      <label>Jumlah
-        <input class="er-quantity" type="number" min="1" required value="${line.quantity||""}">
-      </label>
-      <label>Harga Satuan
-        <input class="er-price" type="number" min="0" value="${line.unit_price||0}">
-      </label>
+      <label>Nama Barang<select class="er-item" required>${receiptItemOptions(line.item_id||"")}</select></label>
+      <label>Nomor Batch<input class="er-batch" required value="${escapeHTML(line.batch_number||"")}"></label>
+      <label>Tanggal Kedaluwarsa<input class="er-expiry" type="date" required value="${escapeHTML(line.expiry_date||"")}"></label>
+      <label>Jumlah<input class="er-quantity" type="number" min="1" required value="${line.quantity||""}"></label>
+      <label>Harga Satuan<input class="er-price" type="number" min="0" value="${line.unit_price||0}"></label>
     </div>
-    <div class="actions">
-      <button type="button" class="btn danger small" onclick="this.closest('.receipt-line').remove()">Hapus Baris</button>
-    </div>
-  `;
-
+    <div class="actions"><button type="button" class="btn danger small" onclick="this.closest('.receipt-line').remove()">Hapus Baris</button></div>`;
   el("editReceiptLines").appendChild(row);
 }
 
@@ -1136,7 +725,7 @@ async function saveEditReceipt(event){
   event.preventDefault();
   if(!requireAdmin()||!receiptEditId)return;
 
-  const lines=[...document.querySelectorAll(".receipt-line")].map(row=>({
+  const lines=[...document.querySelectorAll("#editReceiptLines .receipt-line")].map(row=>({
     item_id:row.querySelector(".er-item").value,
     batch_number:row.querySelector(".er-batch").value.trim(),
     expiry_date:row.querySelector(".er-expiry").value,
@@ -1156,38 +745,26 @@ async function saveEditReceipt(event){
   };
 
   const {error}=await supabaseClient.rpc("edit_goods_receipt",payload);
-
-  if(error){
-    showMessage("Gagal mengedit penerimaan: "+error.message);
-    return;
-  }
+  if(error){showMessage("Gagal mengedit penerimaan: "+error.message);return}
 
   showMessage("Penerimaan berhasil diperbarui.");
   receiptEditId=null;
   await showPage("receipts");
 }
 
-/* =====================================================
-   11. KARTU STOK
-===================================================== */
-
+/* 11. KARTU STOK - VERSI DIPERBARUI */
 async function renderStockCards(){
   el("pageContent").innerHTML=`
     ${pageHeader("Kartu Stok")}
-
     <div class="panel">
       <div class="form-grid">
         <label>Nama Barang
           <select id="cardItem">
             <option value="">Semua Barang</option>
-            ${items.map(i=>`
-              <option value="${i.id}">${escapeHTML(i.item_name)}</option>
-            `).join("")}
+            ${items.map(i=>`<option value="${i.id}">${escapeHTML(i.item_name)}</option>`).join("")}
           </select>
         </label>
-        <label>Nomor Batch
-          <input id="cardBatch" placeholder="Nomor batch">
-        </label>
+        <label>Nomor Batch<input id="cardBatch" placeholder="Nomor batch"></label>
       </div>
       <div class="actions">
         <button class="btn" onclick="loadStockCards()">Tampilkan</button>
@@ -1195,28 +772,47 @@ async function renderStockCards(){
     </div>
 
     <div class="panel">
-      <h3>Riwayat Mutasi Stok</h3>
+      <h3>Ringkasan Stok Akhir per Barang</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Kode</th>
-              <th>Nama Barang</th>
-              <th>Batch</th>
-              <th>Kedaluwarsa</th>
-              <th>Jenis Mutasi</th>
-              <th>Masuk</th>
-              <th>Keluar</th>
-              <th>Saldo</th>
-              <th>Referensi</th>
-            </tr>
-          </thead>
-          <tbody id="cardTable"></tbody>
+          <thead><tr>
+            <th>No</th><th>Kode</th><th>Nama Barang</th><th>Total Stok Akhir</th><th>Satuan</th>
+          </tr></thead>
+          <tbody id="cardItemSummary"></tbody>
         </table>
       </div>
     </div>
-  `;
+
+    <div class="panel">
+      <h3>Ringkasan Stok Akhir per Batch</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>No</th><th>Nama Barang</th><th>Nomor Batch</th>
+            <th>Kedaluwarsa</th><th>Stok Akhir</th><th>Satuan</th>
+          </tr></thead>
+          <tbody id="cardBatchSummary"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Riwayat Mutasi Stok</h3>
+      <div class="notice">
+        Saldo setelah mutasi dihitung secara kronologis untuk setiap kombinasi barang dan batch.
+        Riwayat terbaru ditampilkan di bagian atas.
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Tanggal</th><th>Kode</th><th>Nama Barang</th><th>Batch</th>
+            <th>Kedaluwarsa</th><th>Jenis Mutasi</th><th>Masuk</th>
+            <th>Keluar</th><th>Saldo Setelah Mutasi</th><th>Referensi</th>
+          </tr></thead>
+          <tbody id="cardTable"></tbody>
+        </table>
+      </div>
+    </div>`;
 
   await loadStockCards();
 }
@@ -1229,6 +825,7 @@ async function loadStockCards(){
     .from("v_stock_card_running")
     .select("*")
     .order("created_at",{ascending:false})
+    .order("id",{ascending:false})
     .limit(2000);
 
   if(itemId)query=query.eq("item_id",itemId);
@@ -1237,6 +834,8 @@ async function loadStockCards(){
 
   if(error){
     el("cardTable").innerHTML=emptyRow(10,error.message);
+    el("cardBatchSummary").innerHTML=emptyRow(6,error.message);
+    el("cardItemSummary").innerHTML=emptyRow(5,error.message);
     return;
   }
 
@@ -1245,225 +844,213 @@ async function loadStockCards(){
     String(row.batch_number||"").toLowerCase().includes(batchKeyword)
   );
 
-  el("cardTable").innerHTML=filtered.map(row=>`
+  /* Data pertama untuk setiap batch adalah saldo mutasi terbaru.
+     Query sudah diurutkan terbaru dahulu. */
+  const latestByBatch=new Map();
+
+  filtered.forEach(row=>{
+    const key=`${row.item_id}_${row.batch_id}`;
+    if(!latestByBatch.has(key))latestByBatch.set(key,row);
+  });
+
+  const finalBatches=[...latestByBatch.values()];
+
+  /* Ringkasan per batch */
+  el("cardBatchSummary").innerHTML=finalBatches.map((row,i)=>`
     <tr>
-      <td>${dateID(row.created_at)}</td>
-      <td>${escapeHTML(row.item_code)}</td>
-      <td>${escapeHTML(row.item_name)}</td>
-      <td>${escapeHTML(row.batch_number)}</td>
+      <td>${i+1}</td>
+      <td>${escapeHTML(row.item_name||"-")}</td>
+      <td>${escapeHTML(row.batch_number||"-")}</td>
       <td>${dateID(row.expiry_date)}</td>
-      <td>${escapeHTML(row.movement_type)}</td>
-      <td>${number(row.quantity_in)}</td>
-      <td>${number(row.quantity_out)}</td>
       <td><strong>${number(row.running_balance)}</strong></td>
-      <td>${escapeHTML(row.receipt_number||row.reference_id||"-")}</td>
+      <td>${escapeHTML(row.unit||"-")}</td>
     </tr>
-  `).join("")||emptyRow(10);
+  `).join("")||emptyRow(6);
+
+  /* Ringkasan total per barang */
+  const totalsByItem=new Map();
+
+  finalBatches.forEach(row=>{
+    const key=row.item_id;
+    if(!totalsByItem.has(key)){
+      totalsByItem.set(key,{
+        item_id:row.item_id,
+        item_code:row.item_code,
+        item_name:row.item_name,
+        unit:row.unit,
+        total:0
+      });
+    }
+    totalsByItem.get(key).total+=Number(row.running_balance||0);
+  });
+
+  el("cardItemSummary").innerHTML=[...totalsByItem.values()].map((row,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td>${escapeHTML(row.item_code||"-")}</td>
+      <td>${escapeHTML(row.item_name||"-")}</td>
+      <td><strong>${number(row.total)}</strong></td>
+      <td>${escapeHTML(row.unit||"-")}</td>
+    </tr>
+  `).join("")||emptyRow(5);
+
+  /* Riwayat mutasi terbaru di bagian atas */
+  el("cardTable").innerHTML=filtered.map(row=>{
+    const isIn=Number(row.quantity_in||0)>0;
+    const isOut=Number(row.quantity_out||0)>0;
+
+    let movementLabel=escapeHTML(row.movement_type||"-");
+    let movementClass="";
+
+    if(isIn){
+      movementLabel="Masuk (IN)";
+      movementClass="movement-in";
+    }else if(isOut){
+      movementLabel="Keluar (OUT)";
+      movementClass="movement-out";
+    }
+
+    return `
+      <tr>
+        <td>${dateID(row.created_at)}</td>
+        <td>${escapeHTML(row.item_code||"-")}</td>
+        <td>${escapeHTML(row.item_name||"-")}</td>
+        <td>${escapeHTML(row.batch_number||"-")}</td>
+        <td>${dateID(row.expiry_date)}</td>
+        <td class="${movementClass}">${movementLabel}</td>
+        <td>${number(row.quantity_in)}</td>
+        <td>${number(row.quantity_out)}</td>
+        <td class="balance-cell">${number(row.running_balance)}</td>
+        <td>${escapeHTML(row.receipt_number||row.reference_id||"-")}</td>
+      </tr>`;
+  }).join("")||emptyRow(10);
 }
 
-/* =====================================================
-   12. PENGELUARAN BARANG
-===================================================== */
-
+/* 12. PENGELUARAN BARANG */
 function renderIssues(){
   el("pageContent").innerHTML=`
     ${pageHeader("Pengeluaran Barang")}
-
     <div class="notice">
       Modul ini membutuhkan fungsi database transaksi pengeluaran
       yang aman dan atomik. Jangan melakukan pengurangan stok secara
       manual dari browser.
     </div>
-
     <div class="panel">
       <h3>Stok Tersedia</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama Barang</th>
-              <th>Batch</th>
-              <th>Kedaluwarsa</th>
-              <th>Stok</th>
-              <th>Satuan</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>No</th><th>Nama Barang</th><th>Batch</th>
+            <th>Kedaluwarsa</th><th>Stok</th><th>Satuan</th>
+          </tr></thead>
           <tbody>
             ${batches.map((b,i)=>`
               <tr>
-                <td>${i+1}</td>
-                <td>${escapeHTML(itemName(b.item_id))}</td>
-                <td>${escapeHTML(b.batch_number)}</td>
-                <td>${dateID(b.expiry_date)}</td>
-                <td>${number(b.quantity)}</td>
-                <td>${escapeHTML(itemUnit(b.item_id))}</td>
-              </tr>
-            `).join("")||emptyRow(6)}
+                <td>${i+1}</td><td>${escapeHTML(itemName(b.item_id))}</td>
+                <td>${escapeHTML(b.batch_number)}</td><td>${dateID(b.expiry_date)}</td>
+                <td>${number(b.quantity)}</td><td>${escapeHTML(itemUnit(b.item_id))}</td>
+              </tr>`).join("")||emptyRow(6)}
           </tbody>
         </table>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-/* =====================================================
-   13. REKAPITULASI
-===================================================== */
-
+/* 13. REKAPITULASI */
 async function renderRecap(){
   el("pageContent").innerHTML=`
     ${pageHeader("Rekapitulasi Persediaan")}
-
     <div class="panel">
       <h3>Rekap Stok Saat Ini</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Kode Barang</th>
-              <th>Nama Barang</th>
-              <th>Stok</th>
-              <th>Satuan</th>
-              <th>Stok Minimum</th>
-              <th>Status</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>No</th><th>Kode Barang</th><th>Nama Barang</th><th>Stok</th>
+            <th>Satuan</th><th>Stok Minimum</th><th>Status</th>
+          </tr></thead>
           <tbody>
             ${items.map((item,i)=>{
-              const stock=batches
-                .filter(b=>b.item_id===item.id)
+              const stock=batches.filter(b=>b.item_id===item.id)
                 .reduce((sum,b)=>sum+Number(b.quantity||0),0);
-
               const low=stock<=Number(item.minimum_stock||0);
-
-              return `
-                <tr>
-                  <td>${i+1}</td>
-                  <td>${escapeHTML(item.item_code)}</td>
-                  <td>${escapeHTML(item.item_name)}</td>
-                  <td>${number(stock)}</td>
-                  <td>${escapeHTML(item.unit)}</td>
-                  <td>${number(item.minimum_stock)}</td>
-                  <td><span class="status ${low?"warning":""}">${low?"Stok Minimum":"Normal"}</span></td>
-                </tr>
-              `;
+              return `<tr>
+                <td>${i+1}</td><td>${escapeHTML(item.item_code)}</td>
+                <td>${escapeHTML(item.item_name)}</td><td>${number(stock)}</td>
+                <td>${escapeHTML(item.unit)}</td><td>${number(item.minimum_stock)}</td>
+                <td><span class="status ${low?"warning":""}">${low?"Stok Minimum":"Normal"}</span></td>
+              </tr>`;
             }).join("")||emptyRow(7)}
           </tbody>
         </table>
       </div>
       <button class="btn" onclick="window.print()">Cetak Rekap</button>
-    </div>
-  `;
+    </div>`;
 }
 
-/* =====================================================
-   14. STOCK OPNAME
-===================================================== */
-
+/* 14. STOCK OPNAME */
 function renderStocktake(){
   el("pageContent").innerHTML=`
     ${pageHeader("Stock Opname")}
-
     <div class="notice">
       Modul Stock Opname sudah disediakan pada tampilan ini.
       Penyimpanan hasil opname dan penyesuaian stok memerlukan
       prosedur database khusus agar riwayat mutasi tetap tercatat.
     </div>
-
     <div class="panel">
       <h3>Daftar Stok untuk Pemeriksaan</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama Barang</th>
-              <th>Batch</th>
-              <th>Kedaluwarsa</th>
-              <th>Stok Sistem</th>
-              <th>Satuan</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>No</th><th>Nama Barang</th><th>Batch</th>
+            <th>Kedaluwarsa</th><th>Stok Sistem</th><th>Satuan</th>
+          </tr></thead>
           <tbody>
             ${batches.map((b,i)=>`
               <tr>
-                <td>${i+1}</td>
-                <td>${escapeHTML(itemName(b.item_id))}</td>
-                <td>${escapeHTML(b.batch_number)}</td>
-                <td>${dateID(b.expiry_date)}</td>
-                <td>${number(b.quantity)}</td>
-                <td>${escapeHTML(itemUnit(b.item_id))}</td>
-              </tr>
-            `).join("")||emptyRow(6)}
+                <td>${i+1}</td><td>${escapeHTML(itemName(b.item_id))}</td>
+                <td>${escapeHTML(b.batch_number)}</td><td>${dateID(b.expiry_date)}</td>
+                <td>${number(b.quantity)}</td><td>${escapeHTML(itemUnit(b.item_id))}</td>
+              </tr>`).join("")||emptyRow(6)}
           </tbody>
         </table>
       </div>
-    </div>
-  `;
+    </div>`;
 }
 
-/* =====================================================
-   15. PENGATURAN PENGGUNA
-===================================================== */
-
+/* 15. PENGATURAN PENGGUNA */
 async function renderUsers(){
   if(!requireAdmin())return;
 
   el("pageContent").innerHTML=`
     ${pageHeader("Pengaturan Pengguna")}
-
     <div class="notice">
       Daftar ini membaca profil pengguna yang sudah terdaftar.
       Pembuatan akun login baru dilakukan melalui Supabase
       Authentication oleh Admin yang berwenang.
     </div>
-
     <div class="panel">
       <h3>Daftar Profil Pengguna</h3>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Nama Pengguna</th>
-              <th>Role</th>
-              <th>ID Pengguna</th>
-            </tr>
-          </thead>
+          <thead><tr><th>No</th><th>Nama Pengguna</th><th>Role</th><th>ID Pengguna</th></tr></thead>
           <tbody id="usersTable"></tbody>
         </table>
       </div>
-    </div>
-  `;
+    </div>`;
 
-  const {data,error}=await supabaseClient
-    .from("profiles")
-    .select("id,full_name,role")
-    .order("full_name");
+  const {data,error}=await supabaseClient.from("profiles")
+    .select("id,full_name,role").order("full_name");
 
-  if(error){
-    el("usersTable").innerHTML=emptyRow(4,error.message);
-    return;
-  }
+  if(error){el("usersTable").innerHTML=emptyRow(4,error.message);return}
 
   el("usersTable").innerHTML=(data||[]).map((u,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td>${escapeHTML(u.full_name)}</td>
-      <td>${escapeHTML(u.role)}</td>
-      <td>${escapeHTML(u.id)}</td>
-    </tr>
+    <tr><td>${i+1}</td><td>${escapeHTML(u.full_name)}</td>
+    <td>${escapeHTML(u.role)}</td><td>${escapeHTML(u.id)}</td></tr>
   `).join("")||emptyRow(4);
 }
 
-/* =====================================================
-   16. INISIALISASI
-===================================================== */
-
+/* 16. INISIALISASI */
 initializeApp();
-
 </script>
 </body>
 </html>
