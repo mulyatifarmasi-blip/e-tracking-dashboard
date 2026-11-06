@@ -2,352 +2,158 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIM Persediaan Farmasi - RSAL Kodaeral XIV</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIM Persediaan Farmasi - RSAL Kodaeral XIV</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <style>
-    :root {
-      --navy: #123b65;
-      --blue: #1769aa;
-      --light: #f3f6fa;
-      --white: #ffffff;
-      --text: #243247;
-      --muted: #718096;
-      --border: #e3e9f0;
-      --green: #16845b;
-      --red: #c43d3d;
-    }
+<style>
+:root {
+  --navy:#123b65;
+  --blue:#1769aa;
+  --bg:#f3f6fa;
+  --white:#fff;
+  --text:#243247;
+  --muted:#718096;
+  --border:#e3e9f0;
+  --green:#16845b;
+  --red:#c43d3d;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input{font:inherit}
+button{cursor:pointer}
 
-    * { box-sizing: border-box; }
+/* LOGIN */
+#loginPanel{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;background:#edf2f7
+}
+.login-card{
+  width:100%;max-width:400px;padding:32px;
+  background:white;border-radius:16px;
+  box-shadow:0 10px 35px #102b461c
+}
+.login-logo{
+  width:55px;height:55px;display:grid;place-items:center;
+  background:var(--navy);color:white;border-radius:12px;
+  font-size:25px;font-weight:bold;margin-bottom:20px
+}
+.login-card h2{margin:0 0 8px;color:var(--navy)}
+.login-card p{color:var(--muted);font-size:14px}
+.login-card label{display:block;margin:16px 0 7px;font-size:13px;font-weight:bold}
+.login-card input{
+  width:100%;padding:13px;border:1px solid var(--border);
+  border-radius:8px;outline-color:var(--blue)
+}
+.primary-btn{
+  padding:12px 18px;background:var(--navy);color:white;
+  border:0;border-radius:8px;font-weight:bold
+}
+.login-card .primary-btn{width:100%;margin-top:20px}
+.primary-btn:disabled{opacity:.6;cursor:wait}
+#loginMessage{color:var(--red);font-size:13px;line-height:1.5}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: var(--light);
-      color: var(--text);
-    }
-
-    button, input { font: inherit; }
-
-    /* LOGIN */
-    #loginPanel {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      background: #edf2f7;
-    }
-
-    .login-card {
-      width: 100%;
-      max-width: 400px;
-      padding: 32px;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 10px 35px #102b461c;
-    }
-
-    .login-logo {
-      width: 55px;
-      height: 55px;
-      display: grid;
-      place-items: center;
-      background: var(--navy);
-      color: white;
-      border-radius: 12px;
-      font-size: 25px;
-      font-weight: bold;
-      margin-bottom: 20px;
-    }
-
-    .login-card h2 { margin: 0 0 8px; color: var(--navy); }
-    .login-card p { color: var(--muted); font-size: 14px; }
-
-    .login-card label {
-      display: block;
-      margin: 16px 0 7px;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    .login-card input {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      outline-color: var(--blue);
-    }
-
-    .primary-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 13px;
-      border: 0;
-      border-radius: 8px;
-      color: white;
-      background: var(--navy);
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .primary-btn:disabled { opacity: .6; cursor: wait; }
-
-    #loginMessage {
-      color: var(--red);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    /* APPLICATION */
-    #app { display: none; min-height: 100vh; }
-
-    .topbar {
-      height: 66px;
-      background: white;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-
-    .brand {
-      font-weight: bold;
-      color: var(--navy);
-      font-size: 17px;
-    }
-
-    .brand small {
-      display: block;
-      font-size: 11px;
-      color: var(--muted);
-      font-weight: normal;
-      margin-top: 4px;
-    }
-
-    .user-area {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 13px;
-    }
-
-    .role {
-      background: #e7f0fa;
-      color: var(--navy);
-      padding: 6px 10px;
-      border-radius: 20px;
-      font-weight: bold;
-    }
-
-    .logout-btn {
-      border: 1px solid var(--border);
-      background: white;
-      padding: 8px 12px;
-      border-radius: 7px;
-      cursor: pointer;
-    }
-
-    .layout { display: flex; min-height: calc(100vh - 66px); }
-
-    .sidebar {
-      width: 235px;
-      flex-shrink: 0;
-      background: var(--navy);
-      padding: 22px 12px;
-      color: white;
-    }
-
-    .sidebar-title {
-      color: #a9c5df;
-      font-size: 11px;
-      padding: 10px 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .nav-btn {
-      width: 100%;
-      display: block;
-      padding: 12px;
-      margin-bottom: 5px;
-      border: 0;
-      border-radius: 7px;
-      color: #dce8f3;
-      background: transparent;
-      text-align: left;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .nav-btn:hover, .nav-btn.active {
-      background: #ffffff20;
-      color: white;
-    }
-
-    main {
-      flex: 1;
-      min-width: 0;
-      padding: 28px;
-    }
-
-    .page-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .page-heading h1 {
-      margin: 0;
-      font-size: 24px;
-      color: var(--navy);
-    }
-
-    .page-heading p {
-      color: var(--muted);
-      margin: 7px 0 0;
-      font-size: 13px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-
-    .stat-card {
-      padding: 20px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: white;
-    }
-
-    .stat-card .label {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .stat-card .number {
-      font-size: 28px;
-      font-weight: bold;
-      color: var(--navy);
-      margin-top: 12px;
-    }
-
-    .panel {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-
-    .panel h3 {
-      margin: 0 0 16px;
-      color: var(--navy);
-      font-size: 16px;
-    }
-
-    .table-wrap { overflow-x: auto; }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      min-width: 550px;
-    }
-
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-    }
-
-    th {
-      color: var(--muted);
-      background: #f8fafc;
-      font-weight: bold;
-    }
-
-    .status {
-      display: inline-block;
-      padding: 5px 9px;
-      background: #e6f5ee;
-      color: var(--green);
-      border-radius: 20px;
-      font-size: 11px;
-    }
-
-    .notice {
-      padding: 14px;
-      border-radius: 8px;
-      background: #fff8e6;
-      color: #8a641b;
-      font-size: 13px;
-      line-height: 1.5;
-      margin-bottom: 18px;
-    }
-
-    .muted { color: var(--muted); font-size: 13px; }
-
-    .refresh-btn {
-      border: 1px solid var(--border);
-      background: white;
-      border-radius: 7px;
-      padding: 9px 13px;
-      cursor: pointer;
-    }
-
-    .empty {
-      padding: 25px;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    @media(max-width: 900px) {
-      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .sidebar { width: 195px; }
-    }
-
-    @media(max-width: 650px) {
-      .topbar { padding: 0 12px; }
-      .brand { font-size: 14px; }
-      .user-area { gap: 6px; }
-      .user-name { display: none; }
-      .layout { display: block; }
-      .sidebar {
-        width: 100%;
-        display: flex;
-        overflow-x: auto;
-        padding: 8px;
-      }
-      .sidebar-title { display: none; }
-      .nav-btn {
-        width: auto;
-        white-space: nowrap;
-        margin: 0 3px;
-        padding: 10px;
-      }
-      main { padding: 17px; }
-      .cards { gap: 10px; }
-      .stat-card { padding: 14px; }
-      .stat-card .number { font-size: 23px; }
-      .page-heading h1 { font-size: 20px; }
-    }
-  </style>
+/* APP */
+#app{display:none;min-height:100vh}
+.topbar{
+  height:66px;background:white;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;position:sticky;top:0;z-index:20
+}
+.brand{font-weight:bold;color:var(--navy);font-size:17px}
+.brand small{display:block;font-size:11px;color:var(--muted);font-weight:normal;margin-top:4px}
+.user-area{display:flex;align-items:center;gap:12px;font-size:13px}
+.role{background:#e7f0fa;color:var(--navy);padding:6px 10px;border-radius:20px;font-weight:bold}
+.logout-btn,.refresh-btn{
+  border:1px solid var(--border);background:white;
+  padding:8px 12px;border-radius:7px
+}
+.layout{display:flex;min-height:calc(100vh - 66px)}
+.sidebar{
+  width:235px;flex-shrink:0;background:var(--navy);
+  padding:22px 12px;color:white
+}
+.sidebar-title{
+  color:#a9c5df;font-size:11px;padding:10px 12px;
+  text-transform:uppercase;letter-spacing:1px
+}
+.nav-btn{
+  width:100%;display:block;padding:12px;margin-bottom:5px;
+  border:0;border-radius:7px;color:#dce8f3;
+  background:transparent;text-align:left;font-size:14px
+}
+.nav-btn:hover,.nav-btn.active{background:#ffffff20;color:white}
+main{flex:1;min-width:0;padding:28px}
+.page-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-bottom:24px
+}
+.page-heading h1{margin:0;font-size:24px;color:var(--navy)}
+.page-heading p{color:var(--muted);margin:7px 0 0;font-size:13px}
+.cards{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;margin-bottom:22px
+}
+.stat-card{
+  padding:20px;border:1px solid var(--border);
+  border-radius:12px;background:white
+}
+.stat-card .label{color:var(--muted);font-size:13px}
+.stat-card .number{font-size:28px;font-weight:bold;color:var(--navy);margin-top:12px}
+.panel{
+  background:white;border:1px solid var(--border);
+  border-radius:12px;padding:20px;margin-bottom:20px;overflow:hidden
+}
+.panel h3{margin:0 0 16px;color:var(--navy);font-size:16px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:550px}
+th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left}
+th{color:var(--muted);background:#f8fafc}
+.status{
+  display:inline-block;padding:5px 9px;background:#e6f5ee;
+  color:var(--green);border-radius:20px;font-size:11px
+}
+.notice{
+  padding:14px;border-radius:8px;background:#fff8e6;
+  color:#8a641b;font-size:13px;line-height:1.5;margin-bottom:18px
+}
+.muted{color:var(--muted);font-size:13px}
+.empty{padding:25px;text-align:center;color:var(--muted)}
+.form-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px
+}
+.field label{display:block;font-size:13px;font-weight:bold;margin-bottom:7px}
+.field input{
+  width:100%;padding:11px;border:1px solid var(--border);border-radius:7px
+}
+.action-btn{
+  border:1px solid var(--border);background:white;
+  border-radius:7px;padding:7px 10px;margin:2px
+}
+@media(max-width:900px){
+  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sidebar{width:195px}
+}
+@media(max-width:650px){
+  .topbar{padding:0 12px}
+  .brand{font-size:14px}
+  .user-area{gap:6px}
+  .user-name{display:none}
+  .layout{display:block}
+  .sidebar{width:100%;display:flex;overflow-x:auto;padding:8px}
+  .sidebar-title{display:none}
+  .nav-btn{width:auto;white-space:nowrap;margin:0 3px;padding:10px}
+  main{padding:17px}
+  .cards{gap:10px}
+  .stat-card{padding:14px}
+  .stat-card .number{font-size:23px}
+  .page-heading h1{font-size:20px}
+  .form-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 
 <body>
@@ -361,31 +167,24 @@
 
     <form id="loginForm">
       <label for="loginEmail">Email</label>
-      <input id="loginEmail" type="email"
-        placeholder="Masukkan email" required>
+      <input id="loginEmail" type="email" placeholder="Masukkan email" required>
 
       <label for="loginPassword">Password</label>
-      <input id="loginPassword" type="password"
-        placeholder="Masukkan password" required>
+      <input id="loginPassword" type="password" placeholder="Masukkan password" required>
 
-      <button class="primary-btn" id="loginButton" type="submit">
-        LOGIN
-      </button>
+      <button class="primary-btn" id="loginButton" type="submit">LOGIN</button>
     </form>
-
     <div id="loginMessage" role="alert"></div>
   </div>
 </div>
 
-<!-- APPLICATION -->
+<!-- APLIKASI -->
 <div id="app">
-
   <header class="topbar">
     <div class="brand">
       SIM PERSEDIAAN FARMASI
       <small>KLINIK RSAL KODAERAL XIV</small>
     </div>
-
     <div class="user-area">
       <span class="user-name" id="userName"></span>
       <span class="role" id="userRole"></span>
@@ -394,117 +193,113 @@
   </header>
 
   <div class="layout">
-
     <aside class="sidebar">
       <div class="sidebar-title">Menu Utama</div>
-
-      <button class="nav-btn active" data-page="dashboard">
-        ▦ Dashboard
-      </button>
-
-      <button class="nav-btn" data-page="items">
-        ▤ Master Barang
-      </button>
-
-      <button class="nav-btn" data-page="batches">
-        ▣ Stok per Batch
-      </button>
+      <button class="nav-btn active" data-page="dashboard">▦ Dashboard</button>
+      <button class="nav-btn" data-page="items">▤ Master Barang</button>
+      <button class="nav-btn" data-page="batches">▣ Stok per Batch</button>
 
       <div class="sidebar-title">Transaksi</div>
-
-      <button class="nav-btn" data-page="receipts">
-        ↓ Penerimaan
-      </button>
-
-      <button class="nav-btn" data-page="issues">
-        ↑ Pengeluaran
-      </button>
-
-      <button class="nav-btn" data-page="recap">
-        ▤ Rekap Pengeluaran
-      </button>
-
-      <button class="nav-btn" data-page="cards">
-        ▧ Kartu Stok
-      </button>
-
-      <button class="nav-btn" data-page="stocktake">
-        ☑ Stok Opname
-      </button>
+      <button class="nav-btn" data-page="receipts">↓ Penerimaan</button>
+      <button class="nav-btn" data-page="issues">↑ Pengeluaran</button>
+      <button class="nav-btn" data-page="recap">▤ Rekap Pengeluaran</button>
+      <button class="nav-btn" data-page="cards">▧ Kartu Stok</button>
+      <button class="nav-btn" data-page="stocktake">☑ Stok Opname</button>
 
       <div class="sidebar-title">Sistem</div>
-
-      <button class="nav-btn" data-page="settings">
-        ⚙ Pengaturan
-      </button>
+      <button class="nav-btn" data-page="settings">⚙ Pengaturan</button>
     </aside>
 
     <main>
       <div id="pageContent"></div>
     </main>
-
   </div>
 </div>
 
 <script>
 /* =========================================
-   KONFIGURASI SUPABASE
-   GANTI DENGAN DATA PROYEK ANDA
+   KONFIGURASI
+   Masukkan URL dan Publishable Key Supabase
 ========================================= */
 
-const SUPABASE_URL = "https://janxyyhnbsrplcepyrgb.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://janxyyhnbsrplcepyrgb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_sb6G7BjiUIseKwUeg3gtIA_11vdxJoO";
-
-/* =========================================
-   INISIALISASI
-========================================= */
-
-const loginPanel = document.getElementById("loginPanel");
-const loginMessage = document.getElementById("loginMessage");
-const loginButton = document.getElementById("loginButton");
-const app = document.getElementById("app");
-const pageContent = document.getElementById("pageContent");
 
 let supabaseClient = null;
 let currentProfile = null;
 let itemsData = [];
 let batchesData = [];
+let editingItemId = null;
+
+const $ = id => document.getElementById(id);
 
 /* =========================================
-   VALIDASI DAN KONEKSI
+   UTILITAS
 ========================================= */
 
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",
+    '"':"&quot;","'":"&#039;"
+  })[c]);
+}
+
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString("id-ID");
+}
+
+function showLoginError(message) {
+  $("loginMessage").textContent = message;
+}
+
 function initializeSupabase() {
-  if (
-    SUPABASE_URL.includes("MASUKKAN_") ||
-    SUPABASE_KEY.includes("MASUKKAN_")
-  ) {
-    loginMessage.textContent =
-      "Konfigurasi Supabase belum diisi pada index.html.";
-    return false;
-  }
-
   try {
-    const url = new URL(SUPABASE_URL);
+    const raw = SUPABASE_URL.trim();
 
-    if (
-      url.protocol !== "https:" ||
-      !url.hostname.endsWith(".supabase.co") ||
-      url.pathname !== "/"
-    ) {
-      loginMessage.textContent =
-        "Project URL tidak valid. Periksa Settings > API di Supabase.";
+    if (!raw || raw.includes("MASUKKAN_")) {
+      showLoginError("Project URL belum diisi.");
+      return false;
+    }
+
+    const parsed = new URL(raw);
+
+    if (!["https:", "http:"].includes(parsed.protocol)) {
+      showLoginError("Project URL harus menggunakan https://.");
+      return false;
+    }
+
+    if (parsed.username || parsed.password ||
+        parsed.search || parsed.hash) {
+      showLoginError("Project URL mengandung bagian yang tidak diperlukan.");
+      return false;
+    }
+
+    if (parsed.pathname !== "/" && parsed.pathname !== "") {
+      showLoginError(
+        "Project URL tidak boleh memiliki path tambahan seperti /dashboard, /auth/v1, atau /rest/v1."
+      );
+      return false;
+    }
+
+    if (!SUPABASE_KEY.trim() ||
+        SUPABASE_KEY.includes("MASUKKAN_")) {
+      showLoginError("Publishable Key belum diisi.");
+      return false;
+    }
+
+    if (!window.supabase || !window.supabase.createClient) {
+      showLoginError("Library Supabase gagal dimuat. Periksa koneksi internet.");
       return false;
     }
 
     supabaseClient = window.supabase.createClient(
-      SUPABASE_URL.replace(/\/+$/, ""),
-      SUPABASE_KEY
+      raw.replace(/\/+$/, ""),
+      SUPABASE_KEY.trim()
     );
 
     return true;
   } catch (error) {
-    loginMessage.textContent = "Project URL tidak valid.";
+    showLoginError("Format Project URL tidak valid: " + error.message);
     return false;
   }
 }
@@ -513,143 +308,95 @@ function initializeSupabase() {
    LOGIN
 ========================================= */
 
-document.getElementById("loginForm").addEventListener(
-  "submit",
-  async function(event) {
-    event.preventDefault();
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
 
-    if (!supabaseClient) return;
+  if (!supabaseClient) return;
 
-    const email = document.getElementById("loginEmail")
-      .value.trim();
+  const email = $("loginEmail").value.trim();
+  const password = $("loginPassword").value;
 
-    const password = document.getElementById("loginPassword")
-      .value;
+  $("loginButton").disabled = true;
+  $("loginButton").textContent = "Memproses...";
+  showLoginError("");
 
-    loginMessage.textContent = "";
-    loginButton.disabled = true;
-    loginButton.textContent = "Memproses...";
+  try {
+    const {data,error} = await supabaseClient.auth.signInWithPassword({
+      email,password
+    });
 
-    const { data, error } =
-      await supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
-
-    if (error) {
-      loginMessage.textContent =
-        "Login gagal: " + error.message;
-
-      loginButton.disabled = false;
-      loginButton.textContent = "LOGIN";
-      return;
-    }
+    if (error) throw error;
 
     await loadUserProfile(data.user);
+  } catch(error) {
+    showLoginError("Login gagal: " + error.message);
+  } finally {
+    $("loginButton").disabled = false;
+    $("loginButton").textContent = "LOGIN";
   }
-);
+});
 
 /* =========================================
    PROFIL PENGGUNA
 ========================================= */
 
 async function loadUserProfile(user) {
-  const { data: profile, error } = await supabaseClient
+  const {data:profile,error} = await supabaseClient
     .from("profiles")
-    .select("full_name, role")
-    .eq("id", user.id)
+    .select("full_name,role")
+    .eq("id",user.id)
     .single();
 
   if (error || !profile) {
-    loginMessage.textContent =
-      "Profil pengguna tidak ditemukan atau tidak dapat dibaca. Hubungi Admin.";
-
     await supabaseClient.auth.signOut();
-
-    loginButton.disabled = false;
-    loginButton.textContent = "LOGIN";
+    showLoginError(
+      "Profil pengguna tidak ditemukan atau tidak dapat dibaca: " +
+      (error?.message || "")
+    );
     return;
   }
 
   currentProfile = profile;
+  $("userName").textContent = profile.full_name || user.email;
+  $("userRole").textContent = (profile.role || "staff").toUpperCase();
 
-  document.getElementById("userName").textContent =
-    profile.full_name || user.email;
-
-  document.getElementById("userRole").textContent =
-    (profile.role || "staff").toUpperCase();
-
-  loginPanel.style.display = "none";
-  app.style.display = "block";
+  $("loginPanel").style.display = "none";
+  $("app").style.display = "block";
 
   await loadDashboardData();
   showPage("dashboard");
 }
 
 /* =========================================
-   PEMBACAAN DATA
+   DATA SUPABASE
 ========================================= */
 
 async function loadDashboardData() {
-  pageContent.innerHTML =
-    '<div class="empty">Memuat data dari Supabase...</div>';
+  $("pageContent").innerHTML =
+    '<div class="empty">Mengambil data dari database...</div>';
 
-  const [itemsResult, batchesResult] = await Promise.all([
-    supabaseClient.from("items").select("*"),
-    supabaseClient.from("stock_batches").select("*")
-  ]);
+  try {
+    const [itemsResult,batchesResult] = await Promise.all([
+      supabaseClient.from("items").select("*"),
+      supabaseClient.from("stock_batches").select("*")
+    ]);
 
-  if (itemsResult.error || batchesResult.error) {
-    const err = itemsResult.error || batchesResult.error;
+    if (itemsResult.error) throw itemsResult.error;
+    if (batchesResult.error) throw batchesResult.error;
 
-    pageContent.innerHTML = `
+    itemsData = itemsResult.data || [];
+    batchesData = batchesResult.data || [];
+  } catch(error) {
+    $("pageContent").innerHTML = `
       <div class="panel">
-        <h3>Gagal membaca data</h3>
-        <p class="muted">${escapeHTML(err.message)}</p>
-        <button class="refresh-btn" onclick="loadDashboardData()">
-          Coba Lagi
-        </button>
-      </div>
-    `;
-    return;
+        <h3>Gagal membaca database</h3>
+        <p class="muted">${escapeHTML(error.message)}</p>
+        <button class="refresh-btn" onclick="refreshData()">Coba Lagi</button>
+      </div>`;
+    return false;
   }
 
-  itemsData = itemsResult.data || [];
-  batchesData = batchesResult.data || [];
-}
-
-/* =========================================
-   FORMAT DAN KEAMANAN TAMPILAN
-========================================= */
-
-function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;"
-  })[char]);
-}
-
-function formatNumber(value) {
-  return Number(value || 0).toLocaleString("id-ID");
-}
-
-function getItemName(item) {
-  return item.name || item.item_name ||
-    item.nama_barang || item.description ||
-    item.code || item.id || "-";
-}
-
-function getQuantity(batch) {
-  return Number(
-    batch.quantity ??
-    batch.qty ??
-    batch.stock ??
-    batch.balance ??
-    0
-  );
+  return true;
 }
 
 /* =========================================
@@ -657,67 +404,72 @@ function getQuantity(batch) {
 ========================================= */
 
 function renderDashboard() {
-  const totalItems = itemsData.length;
-  const totalBatches = batchesData.length;
-
-  const totalStock = batchesData.reduce(
-    (sum, batch) => sum + getQuantity(batch), 0
+  const totalStock = batchesData.reduce((sum,batch) =>
+    sum + Number(batch.quantity ?? 0),0
   );
 
-  pageContent.innerHTML = `
+  $("pageContent").innerHTML = `
     <div class="page-heading">
       <div>
         <h1>Dashboard</h1>
         <p>Ringkasan persediaan farmasi</p>
       </div>
-      <button class="refresh-btn" onclick="refreshData()">
-        ↻ Refresh Data
-      </button>
+      <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
     </div>
 
     <div class="notice">
-      Data ditampilkan berdasarkan tabel Supabase yang dapat
-      diakses oleh akun Anda. Fitur transaksi belum diaktifkan.
+      Data dibaca dari database Supabase. Modul transaksi belum diaktifkan.
     </div>
 
     <div class="cards">
       <div class="stat-card">
-        <div class="label">Jumlah Master Barang</div>
-        <div class="number">${formatNumber(totalItems)}</div>
+        <div class="label">Master Barang</div>
+        <div class="number">${formatNumber(itemsData.length)}</div>
       </div>
-
       <div class="stat-card">
         <div class="label">Jumlah Batch</div>
-        <div class="number">${formatNumber(totalBatches)}</div>
+        <div class="number">${formatNumber(batchesData.length)}</div>
       </div>
-
       <div class="stat-card">
         <div class="label">Total Kuantitas Batch</div>
         <div class="number">${formatNumber(totalStock)}</div>
       </div>
-
       <div class="stat-card">
         <div class="label">Status Sistem</div>
-        <div class="number" style="font-size:20px;color:var(--green)">
-          Terhubung
-        </div>
+        <div class="number" style="font-size:20px;color:var(--green)">Terhubung</div>
       </div>
     </div>
 
     <div class="panel">
-      <h3>Status Koneksi Database</h3>
-      <p><span class="status">Terhubung ke Supabase</span></p>
-      <p class="muted">
-        Login: ${escapeHTML(currentProfile?.full_name || "-")}
-      </p>
-      <p class="muted">
-        Role: ${escapeHTML(currentProfile?.role || "-")}
-      </p>
+      <h3>Identitas Pengguna</h3>
+      <p>${escapeHTML(currentProfile?.full_name)}</p>
+      <p class="muted">Role: ${escapeHTML(currentProfile?.role)}</p>
     </div>
 
     <div class="panel">
       <h3>Master Barang Terbaru</h3>
-      ${renderItemsTable(itemsData.slice(0, 10))}
+      ${renderSimpleTable(itemsData.slice(0,10))}
+    </div>
+  `;
+}
+
+function renderSimpleTable(data) {
+  if (!data.length) {
+    return '<div class="empty">Belum ada data.</div>';
+  }
+
+  const cols = Object.keys(data[0]).slice(0,7);
+
+  return `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>${cols.map(c=>`<th>${escapeHTML(c)}</th>`).join("")}</tr></thead>
+        <tbody>
+          ${data.map(row=>`
+            <tr>${cols.map(c=>`<td>${escapeHTML(row[c])}</td>`).join("")}</tr>
+          `).join("")}
+        </tbody>
+      </table>
     </div>
   `;
 }
@@ -726,53 +478,16 @@ function renderDashboard() {
    MASTER BARANG
 ========================================= */
 
-function renderItemsTable(data) {
-  if (!data.length) {
-    return '<div class="empty">Belum ada data barang.</div>';
-  }
-
-  const columns = Object.keys(data[0]).slice(0, 6);
-
-  return `
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            ${columns.map(col =>
-              `<th>${escapeHTML(col)}</th>`
-            ).join("")}
-          </tr>
-        </thead>
-        <tbody>
-          ${data.map(row => `
-            <tr>
-              ${columns.map(col =>
-                `<td>${escapeHTML(row[col])}</td>`
-              ).join("")}
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
-/* =========================================
-   MASTER BARANG - TAMBAH, UBAH, CARI
-========================================= */
-
-let editingItemId = null;
-
 function renderItems() {
   const isAdmin = currentProfile?.role === "admin";
 
-  pageContent.innerHTML = `
+  $("pageContent").innerHTML = `
     <div class="page-heading">
       <div>
         <h1>Master Barang</h1>
         <p>Pengelolaan data master persediaan farmasi</p>
       </div>
-      <button class="refresh-btn" id="refreshItems">↻ Refresh</button>
+      <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
     </div>
 
     ${isAdmin ? `
@@ -780,114 +495,69 @@ function renderItems() {
         <h3 id="itemFormTitle">Tambah Barang Baru</h3>
 
         <form id="itemForm">
-          <div class="cards" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-            <div>
+          <div class="form-grid">
+            <div class="field">
               <label>Kode Barang</label>
-              <input id="itemCode" required maxlength="50"
-                placeholder="Contoh: OB001"
-                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+              <input id="itemCode" maxlength="50" required placeholder="OB001">
             </div>
-
-            <div>
+            <div class="field">
               <label>Nama Barang</label>
-              <input id="itemName" required maxlength="200"
-                placeholder="Nama obat atau alat kesehatan"
-                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+              <input id="itemName" maxlength="200" required placeholder="Nama barang">
             </div>
-
-            <div>
+            <div class="field">
               <label>Kategori</label>
-              <input id="itemCategory" maxlength="100"
-                placeholder="Contoh: Obat"
-                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+              <input id="itemCategory" maxlength="100" placeholder="Obat">
             </div>
-
-            <div>
+            <div class="field">
               <label>Satuan</label>
-              <input id="itemUnit" required maxlength="30"
-                placeholder="Contoh: Tablet, Botol, Box"
-                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+              <input id="itemUnit" maxlength="30" required placeholder="Tablet">
             </div>
-
-            <div>
+            <div class="field">
               <label>Stok Minimum</label>
-              <input id="itemMinimum" type="number" min="0" step="0.01"
-                value="0" required
-                style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
+              <input id="itemMinimum" type="number" min="0" step="0.01" value="0" required>
             </div>
           </div>
 
-          <button class="primary-btn" id="saveItemButton"
-            type="submit" style="max-width:220px">
-            Simpan Barang
-          </button>
-
-          <button type="button" class="refresh-btn"
-            id="cancelItemEdit" style="display:none">
-            Batal Ubah
-          </button>
-
+          <br>
+          <button class="primary-btn" id="saveItemButton">Simpan Barang</button>
+          <button type="button" class="refresh-btn" id="cancelItemEdit" style="display:none">Batal</button>
           <p id="itemMessage" class="muted"></p>
         </form>
       </div>
     ` : `
-      <div class="notice">
-        Akun Staff hanya dapat melihat data Master Barang.
-        Penambahan dan perubahan data hanya dapat dilakukan Admin.
-      </div>
+      <div class="notice">Akun Staff hanya dapat melihat data Master Barang.</div>
     `}
 
     <div class="panel">
       <h3>Daftar Barang (${itemsData.length})</h3>
-
-      <input id="itemSearch" type="search"
-        placeholder="Cari kode atau nama barang..."
+      <input id="itemSearch" type="search" placeholder="Cari kode atau nama barang..."
         style="width:100%;max-width:400px;padding:11px;margin-bottom:15px;border:1px solid var(--border);border-radius:7px">
-
       <div id="itemsTable"></div>
     </div>
   `;
 
-  document.getElementById("refreshItems").addEventListener(
-    "click", refreshData
-  );
-
   renderItemsTableWithActions(itemsData);
 
-  document.getElementById("itemSearch").addEventListener(
-    "input", function() {
-      const keyword = this.value.toLowerCase();
-
-      const filtered = itemsData.filter(item =>
-        String(item.item_code || "").toLowerCase().includes(keyword) ||
-        String(item.item_name || "").toLowerCase().includes(keyword) ||
-        String(item.category || "").toLowerCase().includes(keyword)
-      );
-
-      renderItemsTableWithActions(filtered);
-    }
-  );
+  $("itemSearch").addEventListener("input",function(){
+    const q = this.value.toLowerCase();
+    renderItemsTableWithActions(itemsData.filter(item =>
+      [item.item_code,item.item_name,item.category]
+        .some(v=>String(v||"").toLowerCase().includes(q))
+    ));
+  });
 
   if (isAdmin) {
-    document.getElementById("itemForm").addEventListener(
-      "submit", saveItem
-    );
-
-    document.getElementById("cancelItemEdit").addEventListener(
-      "click", resetItemForm
-    );
+    $("itemForm").addEventListener("submit",saveItem);
+    $("cancelItemEdit").addEventListener("click",resetItemForm);
   }
 }
 
 function renderItemsTableWithActions(data) {
+  const container = $("itemsTable");
   const isAdmin = currentProfile?.role === "admin";
-  const container = document.getElementById("itemsTable");
-
-  if (!container) return;
 
   if (!data.length) {
-    container.innerHTML =
-      '<div class="empty">Belum ada data barang yang sesuai.</div>';
+    container.innerHTML = '<div class="empty">Belum ada data barang yang sesuai.</div>';
     return;
   }
 
@@ -896,40 +566,30 @@ function renderItemsTableWithActions(data) {
       <table>
         <thead>
           <tr>
-            <th>Kode</th>
-            <th>Nama Barang</th>
-            <th>Kategori</th>
-            <th>Satuan</th>
-            <th>Stok Minimum</th>
-            <th>Status</th>
-            ${isAdmin ? "<th>Aksi</th>" : ""}
+            <th>Kode</th><th>Nama Barang</th><th>Kategori</th>
+            <th>Satuan</th><th>Stok Minimum</th><th>Status</th>
+            ${isAdmin?"<th>Aksi</th>":""}
           </tr>
         </thead>
         <tbody>
-          ${data.map(item => `
+          ${data.map(item=>`
             <tr>
               <td>${escapeHTML(item.item_code)}</td>
               <td>${escapeHTML(item.item_name)}</td>
-              <td>${escapeHTML(item.category || "-")}</td>
+              <td>${escapeHTML(item.category||"-")}</td>
               <td>${escapeHTML(item.unit)}</td>
               <td>${formatNumber(item.minimum_stock)}</td>
-              <td>
-                ${item.is_active
-                  ? '<span class="status">Aktif</span>'
-                  : '<span class="status" style="background:#fce8e8;color:#a22">Nonaktif</span>'}
+              <td>${item.is_active
+                ?'<span class="status">Aktif</span>'
+                :'<span class="status" style="background:#fce8e8;color:#a22">Nonaktif</span>'}
               </td>
-              ${isAdmin ? `
+              ${isAdmin?`
                 <td>
-                  <button class="refresh-btn"
-                    data-edit-item="${escapeHTML(item.id)}">
-                    Ubah
+                  <button class="action-btn" data-edit="${escapeHTML(item.id)}">Ubah</button>
+                  <button class="action-btn" data-toggle="${escapeHTML(item.id)}">
+                    ${item.is_active?"Nonaktifkan":"Aktifkan"}
                   </button>
-                  <button class="refresh-btn"
-                    data-toggle-item="${escapeHTML(item.id)}">
-                    ${item.is_active ? "Nonaktifkan" : "Aktifkan"}
-                  </button>
-                </td>
-              ` : ""}
+                </td>`:""}
             </tr>
           `).join("")}
         </tbody>
@@ -937,134 +597,111 @@ function renderItemsTableWithActions(data) {
     </div>
   `;
 
-  container.querySelectorAll("[data-edit-item]").forEach(button => {
-    button.addEventListener("click", () => {
-      editItem(button.dataset.editItem);
-    });
+  container.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.addEventListener("click",()=>editItem(btn.dataset.edit));
   });
 
-  container.querySelectorAll("[data-toggle-item]").forEach(button => {
-    button.addEventListener("click", () => {
-      toggleItem(button.dataset.toggleItem);
-    });
+  container.querySelectorAll("[data-toggle]").forEach(btn=>{
+    btn.addEventListener("click",()=>toggleItem(btn.dataset.toggle));
   });
 }
 
 async function saveItem(event) {
   event.preventDefault();
 
-  if (currentProfile?.role !== "admin") {
-    alert("Hanya Admin yang dapat mengubah Master Barang.");
-    return;
-  }
+  if (currentProfile?.role !== "admin") return;
 
-  const button = document.getElementById("saveItemButton");
-  const message = document.getElementById("itemMessage");
+  const message = $("itemMessage");
+  const button = $("saveItemButton");
 
   const item = {
-    item_code: document.getElementById("itemCode").value.trim(),
-    item_name: document.getElementById("itemName").value.trim(),
-    category: document.getElementById("itemCategory").value.trim() || null,
-    unit: document.getElementById("itemUnit").value.trim(),
-    minimum_stock: Number(document.getElementById("itemMinimum").value),
+    item_code:$("itemCode").value.trim(),
+    item_name:$("itemName").value.trim(),
+    category:$("itemCategory").value.trim()||null,
+    unit:$("itemUnit").value.trim(),
+    minimum_stock:Number($("itemMinimum").value)
   };
 
-  if (!item.item_code || !item.item_name || !item.unit) {
-    message.textContent = "Kode, nama, dan satuan wajib diisi.";
+  if (!item.item_code||!item.item_name||!item.unit) {
+    message.textContent="Kode, nama, dan satuan wajib diisi.";
     return;
   }
 
-  if (!Number.isFinite(item.minimum_stock) || item.minimum_stock < 0) {
-    message.textContent = "Stok minimum harus berupa angka nol atau lebih.";
+  if (!Number.isFinite(item.minimum_stock)||item.minimum_stock<0) {
+    message.textContent="Stok minimum harus angka nol atau lebih.";
     return;
   }
 
-  button.disabled = true;
-  button.textContent = "Menyimpan...";
-  message.textContent = "";
+  button.disabled=true;
+  button.textContent="Menyimpan...";
 
-  let result;
+  try {
+    let result;
 
-  if (editingItemId) {
-    result = await supabaseClient
-      .from("items")
-      .update(item)
-      .eq("id", editingItemId);
-  } else {
-    result = await supabaseClient
-      .from("items")
-      .insert(item);
+    if (editingItemId) {
+      result = await supabaseClient.from("items")
+        .update(item).eq("id",editingItemId);
+    } else {
+      result = await supabaseClient.from("items").insert(item);
+    }
+
+    if (result.error) throw result.error;
+
+    alert(editingItemId?"Perubahan berhasil disimpan.":"Barang berhasil ditambahkan.");
+    editingItemId=null;
+    await loadDashboardData();
+    showPage("items");
+
+  } catch(error) {
+    message.textContent="Gagal menyimpan: "+error.message;
+    button.disabled=false;
+    button.textContent=editingItemId?"Simpan Perubahan":"Simpan Barang";
   }
-
-  if (result.error) {
-    message.textContent = "Gagal menyimpan: " + result.error.message;
-    button.disabled = false;
-    button.textContent = editingItemId ? "Simpan Perubahan" : "Simpan Barang";
-    return;
-  }
-
-  alert(editingItemId
-    ? "Perubahan barang berhasil disimpan."
-    : "Barang baru berhasil ditambahkan.");
-
-  editingItemId = null;
-  await loadDashboardData();
-  showPage("items");
 }
 
 function editItem(id) {
-  const item = itemsData.find(row => row.id === id);
-
+  const item=itemsData.find(x=>x.id===id);
   if (!item) return;
 
-  editingItemId = id;
+  editingItemId=id;
+  $("itemCode").value=item.item_code||"";
+  $("itemName").value=item.item_name||"";
+  $("itemCategory").value=item.category||"";
+  $("itemUnit").value=item.unit||"";
+  $("itemMinimum").value=item.minimum_stock??0;
 
-  document.getElementById("itemCode").value = item.item_code || "";
-  document.getElementById("itemName").value = item.item_name || "";
-  document.getElementById("itemCategory").value = item.category || "";
-  document.getElementById("itemUnit").value = item.unit || "";
-  document.getElementById("itemMinimum").value = item.minimum_stock || 0;
+  $("itemFormTitle").textContent="Ubah Data Barang";
+  $("saveItemButton").textContent="Simpan Perubahan";
+  $("cancelItemEdit").style.display="inline-block";
 
-  document.getElementById("itemFormTitle").textContent = "Ubah Data Barang";
-  document.getElementById("saveItemButton").textContent = "Simpan Perubahan";
-  document.getElementById("cancelItemEdit").style.display = "inline-block";
-
-  document.getElementById("itemForm").scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
+  $("itemForm").scrollIntoView({behavior:"smooth"});
 }
 
 function resetItemForm() {
-  editingItemId = null;
-
-  document.getElementById("itemForm").reset();
-  document.getElementById("itemMinimum").value = 0;
-  document.getElementById("itemFormTitle").textContent = "Tambah Barang Baru";
-  document.getElementById("saveItemButton").textContent = "Simpan Barang";
-  document.getElementById("cancelItemEdit").style.display = "none";
-  document.getElementById("itemMessage").textContent = "";
+  editingItemId=null;
+  $("itemForm").reset();
+  $("itemMinimum").value=0;
+  $("itemFormTitle").textContent="Tambah Barang Baru";
+  $("saveItemButton").textContent="Simpan Barang";
+  $("cancelItemEdit").style.display="none";
+  $("itemMessage").textContent="";
 }
 
 async function toggleItem(id) {
-  if (currentProfile?.role !== "admin") return;
+  if (currentProfile?.role!=="admin") return;
 
-  const item = itemsData.find(row => row.id === id);
+  const item=itemsData.find(x=>x.id===id);
   if (!item) return;
 
-  const nextStatus = !item.is_active;
+  const nextStatus=!item.is_active;
 
-  if (!confirm(
-    `Yakin ingin ${nextStatus ? "mengaktifkan" : "menonaktifkan"} ${item.item_name}?`
-  )) return;
+  if (!confirm(`Yakin ingin ${nextStatus?"mengaktifkan":"menonaktifkan"} ${item.item_name}?`)) return;
 
-  const { error } = await supabaseClient
-    .from("items")
-    .update({ is_active: nextStatus })
-    .eq("id", id);
+  const {error}=await supabaseClient.from("items")
+    .update({is_active:nextStatus}).eq("id",id);
 
   if (error) {
-    alert("Gagal mengubah status: " + error.message);
+    alert("Gagal mengubah status: "+error.message);
     return;
   }
 
@@ -1073,24 +710,21 @@ async function toggleItem(id) {
 }
 
 /* =========================================
-   STOK PER BATCH
+   STOK BATCH
 ========================================= */
 
 function renderBatches() {
-  pageContent.innerHTML = `
+  $("pageContent").innerHTML=`
     <div class="page-heading">
       <div>
         <h1>Stok per Batch</h1>
-        <p>Data batch persediaan dari Supabase</p>
+        <p>Data batch persediaan</p>
       </div>
-      <button class="refresh-btn" onclick="refreshData()">
-        ↻ Refresh
-      </button>
+      <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
     </div>
-
     <div class="panel">
       <h3>Daftar Batch (${batchesData.length})</h3>
-      ${renderItemsTable(batchesData)}
+      ${renderSimpleTable(batchesData)}
     </div>
   `;
 }
@@ -1099,55 +733,28 @@ function renderBatches() {
    MENU PERSIAPAN
 ========================================= */
 
-const futurePages = {
-  receipts: {
-    title: "Penerimaan Barang",
-    description: "Pencatatan penerimaan barang dari pemasok."
-  },
-  issues: {
-    title: "Pengeluaran Barang",
-    description: "Pencatatan pengeluaran dan distribusi barang."
-  },
-  recap: {
-    title: "Rekap Pengeluaran",
-    description: "Laporan pengeluaran berdasarkan periode."
-  },
-  cards: {
-    title: "Kartu Stok",
-    description: "Riwayat mutasi masuk, keluar, dan saldo stok."
-  },
-  stocktake: {
-    title: "Stok Opname",
-    description: "Pencocokan stok fisik dengan stok sistem."
-  },
-  settings: {
-    title: "Pengaturan",
-    description: "Pengaturan akun dan sistem."
-  }
+const futurePages={
+  receipts:["Penerimaan Barang","Pencatatan barang masuk dari pemasok."],
+  issues:["Pengeluaran Barang","Pencatatan barang keluar dan distribusi."],
+  recap:["Rekap Pengeluaran","Laporan pengeluaran berdasarkan periode."],
+  cards:["Kartu Stok","Riwayat mutasi dan saldo stok."],
+  stocktake:["Stok Opname","Pencocokan stok fisik dengan sistem."],
+  settings:["Pengaturan","Pengaturan pengguna dan sistem."]
 };
 
 function renderFuturePage(page) {
-  const config = futurePages[page];
+  const config=futurePages[page];
 
-  pageContent.innerHTML = `
+  $("pageContent").innerHTML=`
     <div class="page-heading">
-      <div>
-        <h1>${config.title}</h1>
-        <p>${config.description}</p>
-      </div>
+      <div><h1>${config[0]}</h1><p>${config[1]}</p></div>
     </div>
-
     <div class="notice">
-      Modul ini masih dalam tahap pengembangan.
-      Belum tersedia pencatatan atau perubahan transaksi.
+      Modul ini masih dalam tahap pengembangan. Transaksi belum dapat dilakukan.
     </div>
-
     <div class="panel">
-      <h3>${config.title}</h3>
-      <div class="empty">
-        Fitur akan diaktifkan setelah koneksi database,
-        hak akses, dan alur transaksi selesai disiapkan.
-      </div>
+      <h3>${config[0]}</h3>
+      <div class="empty">Fitur akan diaktifkan setelah alur transaksi dan keamanan selesai disiapkan.</div>
     </div>
   `;
 }
@@ -1157,23 +764,18 @@ function renderFuturePage(page) {
 ========================================= */
 
 function showPage(page) {
-  document.querySelectorAll(".nav-btn").forEach(button => {
-    button.classList.toggle(
-      "active",
-      button.dataset.page === page
-    );
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.page===page);
   });
 
-  if (page === "dashboard") renderDashboard();
-  else if (page === "items") renderItems();
-  else if (page === "batches") renderBatches();
+  if (page==="dashboard") renderDashboard();
+  else if (page==="items") renderItems();
+  else if (page==="batches") renderBatches();
   else if (futurePages[page]) renderFuturePage(page);
 }
 
-document.querySelectorAll(".nav-btn").forEach(button => {
-  button.addEventListener("click", () => {
-    showPage(button.dataset.page);
-  });
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>showPage(btn.dataset.page));
 });
 
 /* =========================================
@@ -1181,38 +783,29 @@ document.querySelectorAll(".nav-btn").forEach(button => {
 ========================================= */
 
 async function refreshData() {
-  await loadDashboardData();
-
-  if (pageContent.innerHTML.includes("Gagal membaca data")) {
-    return;
+  const ok=await loadDashboardData();
+  if (ok) {
+    const active=document.querySelector(".nav-btn.active")?.dataset.page||"dashboard";
+    showPage(active);
   }
-
-  const activePage = document.querySelector(
-    ".nav-btn.active"
-  )?.dataset.page || "dashboard";
-
-  showPage(activePage);
 }
 
 /* =========================================
-   LOGOUT DAN PEMERIKSAAN SESI
+   LOGOUT DAN SESSION
 ========================================= */
 
-document.getElementById("logoutButton").addEventListener(
-  "click",
-  async function() {
-    await supabaseClient.auth.signOut();
-    location.reload();
-  }
-);
+$("logoutButton").addEventListener("click",async()=>{
+  await supabaseClient.auth.signOut();
+  location.reload();
+});
 
 async function checkSession() {
   if (!initializeSupabase()) return;
 
-  const { data, error } = await supabaseClient.auth.getSession();
+  const {data,error}=await supabaseClient.auth.getSession();
 
   if (error) {
-    loginMessage.textContent = error.message;
+    showLoginError(error.message);
     return;
   }
 
