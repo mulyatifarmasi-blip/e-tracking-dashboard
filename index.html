@@ -378,7 +378,21 @@ async function loadDashboardData() {
   try {
     const [itemsResult,batchesResult] = await Promise.all([
       supabaseClient.from("items").select("*"),
-      supabaseClient.from("stock_batches").select("*")
+      supabaseClient
+  .from("stock_batches")
+  .select(`
+    id,
+    item_id,
+    batch_number,
+    expiry,
+    quantity,
+    item:items!stock_batch_item_id_fkey (
+      item_code,
+      item_name,
+      unit
+    )
+  `)
+  .order("expiry", { ascending: true, nullsFirst: false })
     ]);
 
     if (itemsResult.error) throw itemsResult.error;
@@ -709,25 +723,236 @@ async function toggleItem(id) {
   showPage("items");
 }
 
+
 /* =========================================
-   STOK BATCH
+   STOK BATCH - VERSI BARU
 ========================================= */
 
+function getBatchStatus(batch) {
+  const qty = Number(batch.quantity || 0);
+
+  if (batch.expiry) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expiryDate = new Date(batch.expiry + "T00:00:00");
+
+    if (!Number.isNaN(expiryDate.getTime())) {
+      const diff = Math.ceil(
+        (expiryDate - today) / (1000 * 60 * 60 * 24)
+      );
+
+      if (diff < 0) {
+        return { key: "expired", label: "Kedaluwarsa" };
+      }
+
+      if (diff <= 90) {
+        return { key: "near", label: "Segera Kedaluwarsa" };
+      }
+    }
+  }
+
+  if (qty <= 0) {
+    return { key: "empty", label: "Stok Kosong" };
+  }
+
+  return { key: "available", label: "Tersedia" };
+}
+
+function formatExpiry(value) {
+  if (!value) return "-";
+
+  const date = new Date(value + "T00:00:00");
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric"
+  });
+}
+
 function renderBatches() {
-  $("pageContent").innerHTML=`
+  const totalStock = batchesData.reduce(
+    (sum, batch) => sum + Number(batch.quantity || 0),
+    0
+  );
+
+  const counts = {
+    expired: 0,
+    near: 0,
+    empty: 0,
+    available: 0
+  };
+
+  batchesData.forEach(batch => {
+    const status = getBatchStatus(batch);
+    counts[status.key]++;
+  });
+
+  $("pageContent").innerHTML = `
     <div class="page-heading">
       <div>
         <h1>Stok per Batch</h1>
-        <p>Data batch persediaan</p>
+        <p>Monitoring persediaan berdasarkan nomor batch dan ED</p>
       </div>
-      <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
+      <button class="refresh-btn" onclick="refreshData()">
+        ↻ Refresh
+      </button>
     </div>
+
+    <div class="cards">
+      <div class="stat-card">
+        <div class="label">Jumlah Batch</div>
+        <div class="number">${formatNumber(batchesData.length)}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Total Kuantitas</div>
+        <div class="number">${formatNumber(totalStock)}</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Segera Kedaluwarsa</div>
+        <div class="number" style="color:#b7791f">
+          ${formatNumber(counts.near)}
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="label">Kedaluwarsa</div>
+        <div class="number" style="color:var(--red)">
+          ${formatNumber(counts.expired)}
+        </div>
+      </div>
+    </div>
+
     <div class="panel">
-      <h3>Daftar Batch (${batchesData.length})</h3>
-      ${renderSimpleTable(batchesData)}
+      <h3>Daftar Stok per Batch</h3>
+
+      <div class="form-grid" style="margin-bottom:18px">
+        <div class="field">
+          <label>Pencarian</label>
+          <input
+            id="batchSearch"
+            type="search"
+            placeholder="Nama barang, kode, atau nomor batch"
+          >
+        </div>
+
+        <div class="field">
+          <label>Filter Status</label>
+          <select
+            id="batchStatusFilter"
+            style="width:100%;padding:11px;border:1px solid var(--border);border-radius:7px"
+          >
+            <option value="all">Semua Status</option>
+            <option value="available">Tersedia</option>
+            <option value="empty">Stok Kosong</option>
+            <option value="near">Segera Kedaluwarsa</option>
+            <option value="expired">Kedaluwarsa</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="batchTable"></div>
     </div>
   `;
+
+  function displayBatchTable() {
+    const search = $("batchSearch").value.toLowerCase().trim();
+    const filter = $("batchStatusFilter").value;
+
+    const filtered = batchesData.filter(batch => {
+      const item = batch.item || {};
+
+      const searchText = [
+        item.item_code,
+        item.item_name,
+        batch.batch_number
+      ].join(" ").toLowerCase();
+
+      const status = getBatchStatus(batch);
+
+      return searchText.includes(search) &&
+        (filter === "all" || status.key === filter);
+    });
+
+    if (!filtered.length) {
+      $("batchTable").innerHTML = `
+        <div class="empty">
+          Tidak ada data batch yang sesuai.
+        </div>
+      `;
+      return;
+    }
+
+    $("batchTable").innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Kode Barang</th>
+              <th>Nama Barang</th>
+              <th>Nomor Batch</th>
+              <th>ED</th>
+              <th>Jumlah Stok</th>
+              <th>Satuan</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${filtered.map((batch, index) => {
+              const item = batch.item || {};
+              const status = getBatchStatus(batch);
+
+              let statusStyle = "";
+
+              if (status.key === "expired") {
+                statusStyle = "background:#fce8e8;color:#a22";
+              } else if (status.key === "near") {
+                statusStyle = "background:#fff3cd;color:#856404";
+              } else if (status.key === "empty") {
+                statusStyle = "background:#edf0f4;color:#596579";
+              }
+
+              return `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${escapeHTML(item.item_code || "-")}</td>
+                  <td>${escapeHTML(item.item_name || "Barang tidak ditemukan")}</td>
+                  <td>${escapeHTML(batch.batch_number || "-")}</td>
+                  <td>${formatExpiry(batch.expiry)}</td>
+                  <td><strong>${formatNumber(batch.quantity)}</strong></td>
+                  <td>${escapeHTML(item.unit || "-")}</td>
+                  <td>
+                    <span class="status" style="${statusStyle}">
+                      ${status.label}
+                    </span>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="muted" style="margin-top:12px">
+        Menampilkan ${filtered.length} dari ${batchesData.length} batch.
+        Batas peringatan kedaluwarsa: 90 hari.
+      </p>
+    `;
+  }
+
+  $("batchSearch").addEventListener("input", displayBatchTable);
+  $("batchStatusFilter").addEventListener("change", displayBatchTable);
+
+  displayBatchTable();
 }
+
 
 /* =========================================
    MENU PERSIAPAN
