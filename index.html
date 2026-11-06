@@ -23,7 +23,6 @@
 body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select{font:inherit}
 button{cursor:pointer}
-
 #loginPanel{
   position:fixed;inset:0;z-index:1000;
   display:flex;align-items:center;justify-content:center;
@@ -53,7 +52,6 @@ button{cursor:pointer}
 .login-card .primary-btn{width:100%;margin-top:20px}
 .primary-btn:disabled{opacity:.6;cursor:wait}
 #loginMessage{color:var(--red);font-size:13px;line-height:1.5}
-
 #app{display:none;min-height:100vh}
 .topbar{
   height:66px;background:white;border-bottom:1px solid var(--border);
@@ -107,7 +105,7 @@ main{flex:1;min-width:0;padding:28px}
 .panel h3{margin:0 0 16px;color:var(--navy);font-size:16px}
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:550px}
-th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left}
+th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
 th{color:var(--muted);background:#f8fafc}
 .status{
   display:inline-block;padding:5px 9px;background:#e6f5ee;
@@ -130,6 +128,7 @@ th{color:var(--muted);background:#f8fafc}
   border:1px solid var(--border);background:white;
   border-radius:7px;padding:7px 10px;margin:2px
 }
+.action-btn:hover{background:#edf5fc;border-color:var(--blue)}
 .receipt-line label{
   display:block;font-size:12px;font-weight:bold
 }
@@ -138,35 +137,18 @@ th{color:var(--muted);background:#f8fafc}
   border:1px solid var(--border);border-radius:7px
 }
 .unit-info{
-  margin-top:7px;
-  padding:9px 10px;
-  background:#edf5fc;
-  border-radius:7px;
-  color:var(--navy);
-  font-size:12px;
-  min-height:34px
+  margin-top:7px;padding:9px 10px;background:#edf5fc;
+  border-radius:7px;color:var(--navy);font-size:12px;min-height:34px
 }
 .quantity-preview{
-  margin-top:7px;
-  padding:9px 10px;
-  background:#e8f6ef;
-  color:#16845b;
-  border-radius:7px;
-  font-size:12px;
-  font-weight:bold;
-  min-height:34px
+  margin-top:7px;padding:9px 10px;background:#e8f6ef;
+  color:#16845b;border-radius:7px;font-size:12px;
+  font-weight:bold;min-height:34px
 }
-.receipt-detail{
-  font-size:12px;
-  line-height:1.7;
-  min-width:220px
-}
-.receipt-detail-item{
-  padding:5px 0;
-  border-bottom:1px dashed var(--border)
-}
+.receipt-detail{font-size:12px;line-height:1.7;min-width:220px}
+.receipt-detail-item{padding:5px 0;border-bottom:1px dashed var(--border)}
 .receipt-detail-item:last-child{border-bottom:0}
-
+.edit-panel{border:2px solid var(--blue)}
 @media(max-width:900px){
   .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sidebar{width:195px}
@@ -191,7 +173,6 @@ th{color:var(--muted);background:#f8fafc}
 </head>
 
 <body>
-
 <div id="loginPanel">
   <div class="login-card">
     <div class="login-logo">SF</div>
@@ -227,14 +208,12 @@ th{color:var(--muted);background:#f8fafc}
       <button class="nav-btn active" data-page="dashboard">▦ Dashboard</button>
       <button class="nav-btn" data-page="items">▤ Master Barang</button>
       <button class="nav-btn" data-page="batches">▣ Stok per Batch</button>
-
       <div class="sidebar-title">Transaksi</div>
       <button class="nav-btn" data-page="receipts">↓ Penerimaan</button>
       <button class="nav-btn" data-page="issues">↑ Pengeluaran</button>
       <button class="nav-btn" data-page="recap">▤ Rekap Pengeluaran</button>
       <button class="nav-btn" data-page="cards">▧ Kartu Stok</button>
       <button class="nav-btn" data-page="stocktake">☑ Stok Opname</button>
-
       <div class="sidebar-title">Sistem</div>
       <button class="nav-btn" data-page="settings">⚙ Pengaturan</button>
     </aside>
@@ -252,6 +231,7 @@ let currentProfile = null;
 let itemsData = [];
 let batchesData = [];
 let editingItemId = null;
+let editingReceiptId = null;
 
 const $ = id => document.getElementById(id);
 
@@ -262,16 +242,13 @@ function escapeHTML(value) {
     '"':"&quot;","'":"&#039;"
   })[c]);
 }
-
 function formatNumber(value) {
   return Number(value || 0).toLocaleString("id-ID");
 }
-
 function formatQuantity(value, unit) {
   const quantity = formatNumber(value);
   return unit ? `${quantity} ${unit}` : quantity;
 }
-
 function showLoginError(message) {
   $("loginMessage").textContent = message;
 }
@@ -279,39 +256,31 @@ function showLoginError(message) {
 function initializeSupabase() {
   try {
     const raw = SUPABASE_URL.trim();
-
     if (!raw || raw.includes("MASUKKAN_")) {
       showLoginError("Project URL belum diisi.");
       return false;
     }
-
     const parsed = new URL(raw);
-
     if (!["https:","http:"].includes(parsed.protocol)) {
       showLoginError("Project URL harus menggunakan https://.");
       return false;
     }
-
     if (parsed.username || parsed.password || parsed.search || parsed.hash) {
       showLoginError("Project URL mengandung bagian yang tidak diperlukan.");
       return false;
     }
-
     if (parsed.pathname !== "/" && parsed.pathname !== "") {
       showLoginError("Project URL tidak boleh memiliki path tambahan.");
       return false;
     }
-
     if (!SUPABASE_KEY.trim() || SUPABASE_KEY.includes("MASUKKAN_")) {
       showLoginError("Publishable Key belum diisi.");
       return false;
     }
-
     if (!window.supabase?.createClient) {
       showLoginError("Library Supabase gagal dimuat. Periksa koneksi internet.");
       return false;
     }
-
     supabaseClient = window.supabase.createClient(
       raw.replace(/\/+$/, ""),
       SUPABASE_KEY.trim()
@@ -330,7 +299,6 @@ $("loginForm").addEventListener("submit", async event => {
 
   const email = $("loginEmail").value.trim();
   const password = $("loginPassword").value;
-
   $("loginButton").disabled = true;
   $("loginButton").textContent = "Memproses...";
   showLoginError("");
@@ -350,10 +318,7 @@ $("loginForm").addEventListener("submit", async event => {
 /* PROFIL PENGGUNA */
 async function loadUserProfile(user) {
   const {data:profile,error} = await supabaseClient
-    .from("profiles")
-    .select("full_name,role")
-    .eq("id",user.id)
-    .single();
+    .from("profiles").select("full_name,role").eq("id",user.id).single();
 
   if (error || !profile) {
     await supabaseClient.auth.signOut();
@@ -382,19 +347,16 @@ async function loadDashboardData() {
       supabaseClient.from("items").select("*"),
       supabaseClient.from("stock_batches").select("*")
     ]);
-
     if (itemsResult.error) throw itemsResult.error;
     if (batchesResult.error) throw batchesResult.error;
 
     itemsData = itemsResult.data || [];
     const itemMap = Object.fromEntries(itemsData.map(item => [item.id,item]));
-
     batchesData = (batchesResult.data || []).map(batch => ({
       ...batch,
       item:itemMap[batch.item_id] || null,
       expiry:batch.expiry_date
     }));
-
     batchesData.sort((a,b) => {
       if (!a.expiry) return 1;
       if (!b.expiry) return -1;
@@ -417,17 +379,14 @@ function renderDashboard() {
   const totalStock = batchesData.reduce(
     (sum,batch) => sum + Number(batch.quantity ?? 0),0
   );
-
   $("pageContent").innerHTML = `
     <div class="page-heading">
       <div><h1>Dashboard</h1><p>Ringkasan persediaan farmasi</p></div>
       <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
     </div>
-
     <div class="notice">
       Data dibaca dari database Supabase. Modul pengeluaran dan stok opname masih dalam pengembangan.
     </div>
-
     <div class="cards">
       <div class="stat-card"><div class="label">Master Barang</div>
         <div class="number">${formatNumber(itemsData.length)}</div></div>
@@ -438,24 +397,20 @@ function renderDashboard() {
       <div class="stat-card"><div class="label">Status Sistem</div>
         <div class="number" style="font-size:20px;color:var(--green)">Terhubung</div></div>
     </div>
-
     <div class="panel">
       <h3>Identitas Pengguna</h3>
       <p>${escapeHTML(currentProfile?.full_name)}</p>
       <p class="muted">Role: ${escapeHTML(currentProfile?.role)}</p>
     </div>
-
     <div class="panel">
       <h3>Master Barang Terbaru</h3>
       ${renderSimpleTable(itemsData.slice(0,10))}
-    </div>
-  `;
+    </div>`;
 }
 
 function renderSimpleTable(data) {
   if (!data.length) return '<div class="empty">Belum ada data.</div>';
   const cols = Object.keys(data[0]).slice(0,7);
-
   return `<div class="table-wrap"><table>
     <thead><tr>${cols.map(c=>`<th>${escapeHTML(c)}</th>`).join("")}</tr></thead>
     <tbody>${data.map(row=>`<tr>${cols.map(c=>`<td>${escapeHTML(row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
@@ -465,13 +420,11 @@ function renderSimpleTable(data) {
 /* MASTER BARANG */
 function renderItems() {
   const isAdmin = currentProfile?.role === "admin";
-
   $("pageContent").innerHTML = `
     <div class="page-heading">
       <div><h1>Master Barang</h1><p>Pengelolaan data master persediaan farmasi</p></div>
       <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
     </div>
-
     ${isAdmin ? `
       <div class="panel">
         <h3 id="itemFormTitle">Tambah Barang Baru</h3>
@@ -490,17 +443,14 @@ function renderItems() {
         </form>
       </div>
     ` : '<div class="notice">Akun Staff hanya dapat melihat data Master Barang.</div>'}
-
     <div class="panel">
       <h3>Daftar Barang (${itemsData.length})</h3>
       <input id="itemSearch" type="search" placeholder="Cari kode atau nama barang..."
         style="width:100%;max-width:400px;padding:11px;margin-bottom:15px;border:1px solid var(--border);border-radius:7px">
       <div id="itemsTable"></div>
-    </div>
-  `;
+    </div>`;
 
   renderItemsTableWithActions(itemsData);
-
   $("itemSearch").addEventListener("input",function(){
     const q = this.value.toLowerCase();
     renderItemsTableWithActions(itemsData.filter(item =>
@@ -508,7 +458,6 @@ function renderItems() {
         .some(v=>String(v||"").toLowerCase().includes(q))
     ));
   });
-
   if (isAdmin) {
     $("itemForm").addEventListener("submit",saveItem);
     $("cancelItemEdit").addEventListener("click",resetItemForm);
@@ -518,12 +467,10 @@ function renderItems() {
 function renderItemsTableWithActions(data) {
   const container = $("itemsTable");
   const isAdmin = currentProfile?.role === "admin";
-
   if (!data.length) {
     container.innerHTML = '<div class="empty">Belum ada data barang yang sesuai.</div>';
     return;
   }
-
   container.innerHTML = `
     <div class="table-wrap"><table>
       <thead><tr>
@@ -549,9 +496,7 @@ function renderItemsTableWithActions(data) {
             </td>`:""}
           </tr>`).join("")}
       </tbody>
-    </table></div>
-  `;
-
+    </table></div>`;
   container.querySelectorAll("[data-edit]").forEach(btn=>{
     btn.addEventListener("click",()=>editItem(btn.dataset.edit));
   });
@@ -563,10 +508,8 @@ function renderItemsTableWithActions(data) {
 async function saveItem(event) {
   event.preventDefault();
   if (currentProfile?.role !== "admin") return;
-
   const message = $("itemMessage");
   const button = $("saveItemButton");
-
   const item = {
     item_code:$("itemCode").value.trim(),
     item_name:$("itemName").value.trim(),
@@ -574,7 +517,6 @@ async function saveItem(event) {
     unit:$("itemUnit").value.trim(),
     minimum_stock:Number($("itemMinimum").value)
   };
-
   if (!item.item_code||!item.item_name||!item.unit) {
     message.textContent="Kode, nama, dan satuan wajib diisi.";
     return;
@@ -583,10 +525,8 @@ async function saveItem(event) {
     message.textContent="Stok minimum harus angka nol atau lebih.";
     return;
   }
-
   button.disabled=true;
   button.textContent="Menyimpan...";
-
   try {
     let result;
     if (editingItemId) {
@@ -595,7 +535,6 @@ async function saveItem(event) {
       result=await supabaseClient.from("items").insert(item);
     }
     if (result.error) throw result.error;
-
     alert(editingItemId?"Perubahan berhasil disimpan.":"Barang berhasil ditambahkan.");
     editingItemId=null;
     await loadDashboardData();
@@ -610,7 +549,6 @@ async function saveItem(event) {
 function editItem(id) {
   const item=itemsData.find(x=>x.id===id);
   if (!item) return;
-
   editingItemId=id;
   $("itemCode").value=item.item_code||"";
   $("itemName").value=item.item_name||"";
@@ -637,13 +575,10 @@ async function toggleItem(id) {
   if (currentProfile?.role!=="admin") return;
   const item=itemsData.find(x=>x.id===id);
   if (!item) return;
-
   const nextStatus=!item.is_active;
   if (!confirm(`Yakin ingin ${nextStatus?"mengaktifkan":"menonaktifkan"} ${item.item_name}?`)) return;
-
   const {error}=await supabaseClient.from("items")
     .update({is_active:nextStatus}).eq("id",id);
-
   if (error) {
     alert("Gagal mengubah status: "+error.message);
     return;
@@ -655,12 +590,10 @@ async function toggleItem(id) {
 /* STOK PER BATCH */
 function getBatchStatus(batch) {
   const qty=Number(batch.quantity||0);
-
   if (batch.expiry) {
     const today=new Date();
     today.setHours(0,0,0,0);
     const expiryDate=new Date(batch.expiry+"T00:00:00");
-
     if (!Number.isNaN(expiryDate.getTime())) {
       const diff=Math.ceil((expiryDate-today)/(1000*60*60*24));
       if (diff<0) return {key:"expired",label:"Kedaluwarsa"};
@@ -670,7 +603,6 @@ function getBatchStatus(batch) {
   if (qty<=0) return {key:"empty",label:"Stok Kosong"};
   return {key:"available",label:"Tersedia"};
 }
-
 function formatExpiry(value) {
   if (!value) return "-";
   const date=new Date(value+"T00:00:00");
@@ -682,20 +614,17 @@ function renderBatches() {
   const totalStock=batchesData.reduce((sum,batch)=>sum+Number(batch.quantity||0),0);
   const counts={expired:0,near:0,empty:0,available:0};
   batchesData.forEach(batch=>counts[getBatchStatus(batch).key]++);
-
   $("pageContent").innerHTML=`
     <div class="page-heading">
       <div><h1>Stok per Batch</h1><p>Monitoring persediaan berdasarkan nomor batch dan ED</p></div>
       <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
     </div>
-
     <div class="cards">
       <div class="stat-card"><div class="label">Jumlah Batch</div><div class="number">${formatNumber(batchesData.length)}</div></div>
       <div class="stat-card"><div class="label">Total Kuantitas</div><div class="number">${formatNumber(totalStock)}</div></div>
       <div class="stat-card"><div class="label">Segera Kedaluwarsa</div><div class="number" style="color:#b7791f">${formatNumber(counts.near)}</div></div>
       <div class="stat-card"><div class="label">Kedaluwarsa</div><div class="number" style="color:var(--red)">${formatNumber(counts.expired)}</div></div>
     </div>
-
     <div class="panel">
       <h3>Daftar Stok per Batch</h3>
       <div class="form-grid" style="margin-bottom:18px">
@@ -713,25 +642,21 @@ function renderBatches() {
         </div>
       </div>
       <div id="batchTable"></div>
-    </div>
-  `;
+    </div>`;
 
   function displayBatchTable() {
     const search=$("batchSearch").value.toLowerCase().trim();
     const filter=$("batchStatusFilter").value;
-
     const filtered=batchesData.filter(batch=>{
       const item=batch.item||{};
       const searchText=[item.item_code,item.item_name,batch.batch_number].join(" ").toLowerCase();
       const status=getBatchStatus(batch);
       return searchText.includes(search)&&(filter==="all"||status.key===filter);
     });
-
     if (!filtered.length) {
       $("batchTable").innerHTML='<div class="empty">Tidak ada data batch yang sesuai.</div>';
       return;
     }
-
     $("batchTable").innerHTML=`
       <div class="table-wrap"><table>
         <thead><tr>
@@ -762,10 +687,8 @@ function renderBatches() {
       </table></div>
       <p class="muted" style="margin-top:12px">
         Menampilkan ${filtered.length} dari ${batchesData.length} batch. Batas peringatan kedaluwarsa: 90 hari.
-      </p>
-    `;
+      </p>`;
   }
-
   $("batchSearch").addEventListener("input",displayBatchTable);
   $("batchStatusFilter").addEventListener("change",displayBatchTable);
   displayBatchTable();
@@ -776,96 +699,286 @@ function receiptItemOptions() {
   return itemsData.filter(item=>item.is_active!==false).map(item=>`
     <option value="${escapeHTML(item.id)}">
       ${escapeHTML(item.item_code)} - ${escapeHTML(item.item_name)}
-    </option>
-  `).join("");
+    </option>`).join("");
 }
 
-/* FORM DETAIL BARANG DENGAN SATUAN OTOMATIS */
 function addReceiptLine() {
   const container=$("receiptLines");
   const row=document.createElement("div");
   row.className="receipt-line panel";
   row.style.marginBottom="12px";
-
   row.innerHTML=`
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
       <label>Nama Barang
         <select class="r-item" required>
-          <option value="">Pilih barang</option>
-          ${receiptItemOptions()}
+          <option value="">Pilih barang</option>${receiptItemOptions()}
         </select>
         <div class="unit-info r-unit-info">Pilih barang untuk melihat satuan.</div>
       </label>
-
       <label>Nomor Batch
         <input class="r-batch" required placeholder="Nomor batch">
       </label>
-
       <label>Tanggal Kedaluwarsa
         <input class="r-expiry" type="date" required>
       </label>
-
       <label class="r-quantity-label">Jumlah
         <input class="r-quantity" type="number" min="0.01" step="any" required placeholder="Masukkan jumlah">
         <div class="quantity-preview r-quantity-preview">Preview jumlah akan tampil di sini.</div>
       </label>
-
       <label>Harga Satuan (Rp)
         <input class="r-price" type="number" min="0" step="any" required placeholder="Harga per satuan">
       </label>
     </div>
-
-    <button type="button" class="refresh-btn r-remove" style="margin-top:10px">Hapus Barang</button>
-  `;
+    <button type="button" class="refresh-btn r-remove" style="margin-top:10px">Hapus Barang</button>`;
 
   container.appendChild(row);
-
   const itemSelect=row.querySelector(".r-item");
   const quantityInput=row.querySelector(".r-quantity");
   const unitInfo=row.querySelector(".r-unit-info");
   const quantityLabel=row.querySelector(".r-quantity-label");
   const quantityPreview=row.querySelector(".r-quantity-preview");
 
-  function updateUnitDisplay() {
-    const selectedItem=itemsData.find(item=>item.id===itemSelect.value);
-    const unit=selectedItem?.unit?.trim()||"Satuan belum diisi";
-
-    unitInfo.textContent="Satuan: "+unit;
-    quantityLabel.firstChild.textContent="Jumlah ("+unit+")";
-
-    updateQuantityPreview();
-  }
-
   function updateQuantityPreview() {
     const selectedItem=itemsData.find(item=>item.id===itemSelect.value);
     const unit=selectedItem?.unit?.trim()||"";
     const quantity=quantityInput.value;
-
     if (!selectedItem || quantity==="") {
       quantityPreview.textContent="Preview jumlah akan tampil di sini.";
       return;
     }
-
     const numericQuantity=Number(quantity);
     if (!Number.isFinite(numericQuantity) || numericQuantity<=0) {
       quantityPreview.textContent="Masukkan jumlah yang valid.";
       return;
     }
-
     quantityPreview.textContent="Jumlah diterima: "+formatQuantity(numericQuantity,unit);
   }
-
+  function updateUnitDisplay() {
+    const selectedItem=itemsData.find(item=>item.id===itemSelect.value);
+    const unit=selectedItem?.unit?.trim()||"Satuan belum diisi";
+    unitInfo.textContent="Satuan: "+unit;
+    quantityLabel.firstChild.textContent="Jumlah ("+unit+")";
+    updateQuantityPreview();
+  }
   itemSelect.addEventListener("change",updateUnitDisplay);
   quantityInput.addEventListener("input",updateQuantityPreview);
-
   row.querySelector(".r-remove").addEventListener("click",()=>row.remove());
 }
 
-/* RIWAYAT PENERIMAAN BESERTA DETAIL BARANG */
+/* TAMBAH DETAIL BARANG UNTUK FORM EDIT */
+function addEditReceiptLine(line = {}) {
+  const container = $("editReceiptLines");
+  const row = document.createElement("div");
+  row.className = "receipt-line panel";
+  row.style.marginBottom = "12px";
+
+  row.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+      <label>Nama Barang
+        <select class="er-item" required>
+          <option value="">Pilih barang</option>
+          ${receiptItemOptions()}
+        </select>
+        <div class="unit-info er-unit">Satuan barang</div>
+      </label>
+      <label>Nomor Batch
+        <input class="er-batch" required>
+      </label>
+      <label>Tanggal Kedaluwarsa
+        <input class="er-expiry" type="date" required>
+      </label>
+      <label>Jumlah
+        <input class="er-quantity" type="number" min="0.01" step="any" required>
+      </label>
+      <label>Harga Satuan (Rp)
+        <input class="er-price" type="number" min="0" step="any" required>
+      </label>
+    </div>
+    <button type="button" class="refresh-btn er-remove" style="margin-top:10px">
+      Hapus Barang
+    </button>`;
+
+  container.appendChild(row);
+  const itemSelect = row.querySelector(".er-item");
+  itemSelect.value = line.item_id || "";
+  row.querySelector(".er-batch").value = line.batch_number || "";
+  row.querySelector(".er-expiry").value = line.expiry_date || "";
+  row.querySelector(".er-quantity").value = line.quantity ?? "";
+  row.querySelector(".er-price").value = line.unit_price ?? 0;
+
+  function updateUnit() {
+    const item = itemsData.find(x => x.id === itemSelect.value);
+    row.querySelector(".er-unit").textContent =
+      "Satuan: " + (item?.unit || "-");
+  }
+  itemSelect.addEventListener("change", updateUnit);
+  updateUnit();
+
+  row.querySelector(".er-remove").addEventListener("click", () => {
+    if (container.querySelectorAll(".receipt-line").length <= 1) {
+      alert("Minimal harus ada satu barang.");
+      return;
+    }
+    row.remove();
+  });
+}
+
+/* MEMBUKA FORM EDIT PENERIMAAN */
+async function openReceiptEdit(receiptId) {
+  if (currentProfile?.role !== "admin") return;
+  const panel = $("receiptEditPanel");
+  if (!panel) return;
+
+  panel.innerHTML = '<div class="empty">Mengambil data penerimaan...</div>';
+
+  try {
+    const { data: receipt, error } = await supabaseClient
+      .from("goods_receipts")
+      .select("*")
+      .eq("id", receiptId)
+      .single();
+    if (error) throw error;
+
+    const { data: lines, error: linesError } = await supabaseClient
+      .from("goods_receipt_lines")
+      .select("*")
+      .eq("receipt_id", receiptId);
+    if (linesError) throw linesError;
+    if (!lines?.length) throw new Error("Detail barang tidak ditemukan.");
+
+    editingReceiptId = receiptId;
+
+    panel.innerHTML = `
+      <div class="panel edit-panel" id="receiptEditFormPanel">
+        <h3>Edit Penerimaan</h3>
+        <div class="notice">
+          Perubahan akan dikoreksi pada stok dan dicatat sebagai pergerakan stok baru.
+          Riwayat pergerakan sebelumnya tidak dihapus.
+        </div>
+        <form id="editReceiptForm">
+          <div class="form-grid">
+            <div class="field">
+              <label>Nomor Penerimaan</label>
+              <input id="erNumber" required>
+            </div>
+            <div class="field">
+              <label>Tanggal Penerimaan</label>
+              <input id="erDate" type="date" required>
+            </div>
+            <div class="field">
+              <label>Nama Supplier</label>
+              <input id="erSupplier" required>
+            </div>
+            <div class="field">
+              <label>Catatan</label>
+              <input id="erNotes">
+            </div>
+          </div>
+          <hr style="margin:20px 0">
+          <h3>Detail Barang</h3>
+          <div id="editReceiptLines"></div>
+          <button type="button" class="refresh-btn" id="addEditLine">+ Tambah Barang</button>
+          <hr style="margin:20px 0">
+          <button type="submit" class="primary-btn" id="saveEditReceipt">Simpan Perubahan</button>
+          <button type="button" class="refresh-btn" id="cancelEditReceipt">Batal</button>
+          <p id="editReceiptMessage" class="muted"></p>
+        </form>
+      </div>`;
+
+    $("erNumber").value = receipt.receipt_number || "";
+    $("erDate").value = receipt.receipt_date || "";
+    $("erSupplier").value = receipt.supplier || "";
+    $("erNotes").value = receipt.notes || "";
+
+    lines.forEach(line => addEditReceiptLine(line));
+
+    $("addEditLine").addEventListener("click", () => addEditReceiptLine());
+    $("cancelEditReceipt").addEventListener("click", () => {
+      editingReceiptId = null;
+      panel.innerHTML = "";
+    });
+    $("editReceiptForm").addEventListener("submit", saveReceiptEdit);
+    panel.scrollIntoView({ behavior: "smooth" });
+
+  } catch (error) {
+    editingReceiptId = null;
+    panel.innerHTML = `
+      <div class="notice">
+        Gagal membuka data penerimaan: ${escapeHTML(error.message)}
+      </div>`;
+  }
+}
+
+/* SIMPAN PERUBAHAN PENERIMAAN */
+async function saveReceiptEdit(event) {
+  event.preventDefault();
+  if (!editingReceiptId || currentProfile?.role !== "admin") return;
+
+  const button = $("saveEditReceipt");
+  const message = $("editReceiptMessage");
+  const rows = [...document.querySelectorAll("#editReceiptLines .receipt-line")];
+
+  const lines = rows.map(row => ({
+    item_id: row.querySelector(".er-item").value,
+    batch_number: row.querySelector(".er-batch").value.trim(),
+    expiry_date: row.querySelector(".er-expiry").value,
+    quantity: Number(row.querySelector(".er-quantity").value),
+    unit_price: Number(row.querySelector(".er-price").value)
+  }));
+
+  if (!lines.length) {
+    message.textContent = "Minimal satu barang harus tersedia.";
+    return;
+  }
+  if (lines.some(line =>
+    !line.item_id || !line.batch_number || !line.expiry_date ||
+    !Number.isFinite(line.quantity) || line.quantity <= 0 ||
+    !Number.isFinite(line.unit_price) || line.unit_price < 0
+  )) {
+    message.textContent = "Periksa kembali seluruh detail barang.";
+    return;
+  }
+
+  const params = {
+    p_receipt_id: editingReceiptId,
+    p_receipt_number: $("erNumber").value.trim(),
+    p_receipt_date: $("erDate").value,
+    p_supplier: $("erSupplier").value.trim(),
+    p_notes: $("erNotes").value.trim(),
+    p_lines: lines
+  };
+
+  if (!params.p_receipt_number || !params.p_receipt_date || !params.p_supplier) {
+    message.textContent = "Nomor, tanggal, dan supplier wajib diisi.";
+    return;
+  }
+
+  if (!confirm("Simpan perubahan penerimaan? Stok dan Kartu Stok akan dikoreksi.")) return;
+
+  button.disabled = true;
+  button.textContent = "Menyimpan...";
+  message.textContent = "";
+
+  try {
+    const { error } = await supabaseClient.rpc("edit_goods_receipt", params);
+    if (error) throw error;
+
+    alert("Perubahan penerimaan berhasil disimpan.");
+    editingReceiptId = null;
+    await loadDashboardData();
+    showPage("receipts");
+
+  } catch (error) {
+    message.textContent = "Gagal mengedit penerimaan: " + error.message;
+    button.disabled = false;
+    button.textContent = "Simpan Perubahan";
+  }
+}
+
+/* RIWAYAT PENERIMAAN */
 async function loadReceiptHistory() {
   const target=$("receiptHistory");
   if (!target) return;
-
   target.innerHTML='<div class="empty">Memuat riwayat penerimaan...</div>';
 
   const {data,error}=await supabaseClient
@@ -877,29 +990,23 @@ async function loadReceiptHistory() {
     target.innerHTML=`<div class="notice">Gagal membaca riwayat: ${escapeHTML(error.message)}</div>`;
     return;
   }
-
   if (!data?.length) {
     target.innerHTML='<div class="empty">Belum ada transaksi penerimaan.</div>';
     return;
   }
 
-  /* Mengambil detail transaksi */
   const receiptIds=data.map(receipt=>receipt.id);
-
   const {data:lines,error:linesError}=await supabaseClient
     .from("goods_receipt_lines")
-    .select("id,receipt_id,item_id,batch_number,expiry_date,quantity")
+    .select("id,receipt_id,item_id,batch_number,expiry_date,quantity,unit_price,unit")
     .in("receipt_id",receiptIds);
 
   const itemMap=Object.fromEntries(itemsData.map(item=>[item.id,item]));
-
   const linesByReceipt={};
 
   if (!linesError && lines) {
     lines.forEach(line=>{
-      if (!linesByReceipt[line.receipt_id]) {
-        linesByReceipt[line.receipt_id]=[];
-      }
+      if (!linesByReceipt[line.receipt_id]) linesByReceipt[line.receipt_id]=[];
       linesByReceipt[line.receipt_id].push(line);
     });
   }
@@ -909,36 +1016,28 @@ async function loadReceiptHistory() {
       <div class="notice">
         Riwayat penerimaan berhasil dibaca, tetapi detail barang belum dapat ditampilkan.
         Keterangan: ${escapeHTML(linesError.message)}
-      </div>
-    `:""}
-
+      </div>`:""}
     <div class="table-wrap"><table>
-      <thead>
-        <tr>
-          <th>No. Penerimaan</th>
-          <th>Tanggal</th>
-          <th>Pemasok</th>
-          <th>Detail Barang</th>
-          <th>Catatan</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th>No. Penerimaan</th><th>Tanggal</th><th>Pemasok</th>
+        <th>Detail Barang</th><th>Catatan</th>
+        ${currentProfile?.role==="admin"?"<th>Aksi</th>":""}
+      </tr></thead>
       <tbody>
         ${data.map(receipt=>{
           const receiptLines=linesByReceipt[receipt.id]||[];
-
           const detailHTML=receiptLines.length
             ? receiptLines.map(line=>{
                 const item=itemMap[line.item_id];
                 const itemName=item?.item_name||"Barang tidak ditemukan";
-                const unit=item?.unit||"";
+                const unit=line.unit||item?.unit||"";
                 return `
                   <div class="receipt-detail-item">
                     <strong>${escapeHTML(itemName)}</strong><br>
                     Jumlah: ${escapeHTML(formatQuantity(line.quantity,unit))}<br>
                     Batch: ${escapeHTML(line.batch_number||"-")}<br>
                     ED: ${escapeHTML(formatExpiry(line.expiry_date))}
-                  </div>
-                `;
+                  </div>`;
               }).join("")
             : '<span class="muted">Detail tidak tersedia</span>';
 
@@ -949,23 +1048,34 @@ async function loadReceiptHistory() {
               <td>${escapeHTML(receipt.supplier||"-")}</td>
               <td><div class="receipt-detail">${detailHTML}</div></td>
               <td>${escapeHTML(receipt.notes||"-")}</td>
-            </tr>
-          `;
+              ${currentProfile?.role==="admin"?`
+                <td>
+                  <button class="action-btn" data-edit-receipt="${escapeHTML(receipt.id)}">
+                    Edit
+                  </button>
+                </td>`:""}
+            </tr>`;
         }).join("")}
       </tbody>
-    </table></div>
-  `;
+    </table></div>`;
+
+  target.querySelectorAll("[data-edit-receipt]").forEach(button=>{
+    button.addEventListener("click",()=>{
+      openReceiptEdit(button.dataset.editReceipt);
+    });
+  });
 }
 
+/* HALAMAN PENERIMAAN */
 async function renderReceipts() {
   const isAdmin=currentProfile?.role==="admin";
+  editingReceiptId = null;
 
   $("pageContent").innerHTML=`
     <div class="page-heading">
       <div><h1>Penerimaan Barang</h1><p>Pencatatan barang masuk dari pemasok.</p></div>
       <button class="refresh-btn" onclick="refreshData()">↻ Refresh</button>
     </div>
-
     ${isAdmin?`
       <div class="panel">
         <h3>Informasi Penerimaan</h3>
@@ -974,57 +1084,47 @@ async function renderReceipts() {
             <label>Nomor Faktur / Penerimaan
               <input id="receiptNumber" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
-
             <label>Tanggal Penerimaan
               <input id="receiptDate" type="date" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
-
             <label>Nama Pemasok
               <input id="receiptSupplier" required style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
-
             <label>Catatan
               <input id="receiptNotes" style="display:block;width:100%;padding:11px;border:1px solid var(--border);border-radius:7px">
             </label>
           </div>
-
           <hr style="margin:20px 0">
           <h3>Detail Barang</h3>
-
           <div class="notice">
-            Pilih barang terlebih dahulu. Satuan akan mengikuti satuan yang sudah tercatat pada Master Barang.
+            Pilih barang terlebih dahulu. Satuan mengikuti satuan pada Master Barang.
           </div>
-
           <div id="receiptLines"></div>
-
           <button type="button" class="refresh-btn" id="addReceiptLine">+ Tambah Barang</button>
-
           <hr style="margin:20px 0">
-
           <button type="submit" class="primary-btn" id="saveReceipt">Simpan Penerimaan</button>
           <div id="receiptMessage" style="margin-top:12px"></div>
         </form>
-      </div>
-    `:'<div class="notice">Akun Staff hanya dapat melihat riwayat penerimaan. Penyimpanan transaksi hanya dapat dilakukan oleh Admin.</div>'}
+      </div>`:
+      '<div class="notice">Akun Staff hanya dapat melihat riwayat penerimaan. Penyimpanan transaksi hanya dapat dilakukan oleh Admin.</div>'}
+
+    <div id="receiptEditPanel"></div>
 
     <div class="panel">
       <h3>Riwayat Penerimaan</h3>
       <div id="receiptHistory"><div class="empty">Memuat data...</div></div>
-    </div>
-  `;
+    </div>`;
 
   if (isAdmin) {
     $("receiptDate").value=new Date().toLocaleDateString("en-CA");
     addReceiptLine();
-
     $("addReceiptLine").addEventListener("click",addReceiptLine);
 
     $("receiptForm").addEventListener("submit",async event=>{
       event.preventDefault();
-
       const button=$("saveReceipt");
       const message=$("receiptMessage");
-      const rows=[...document.querySelectorAll(".receipt-line")];
+      const rows=[...document.querySelectorAll("#receiptLines .receipt-line")];
 
       const lines=rows.map(row=>({
         item_id:row.querySelector(".r-item").value,
@@ -1038,7 +1138,6 @@ async function renderReceipts() {
         message.textContent="Tambahkan minimal satu barang.";
         return;
       }
-
       if (lines.some(line=>
         !line.item_id||!line.batch_number||!line.expiry_date||
         !Number.isFinite(Number(line.quantity))||Number(line.quantity)<=0||
@@ -1048,23 +1147,19 @@ async function renderReceipts() {
         message.textContent="Periksa kembali seluruh data barang.";
         return;
       }
-
       if (!$("receiptNumber").value.trim()||!$("receiptSupplier").value.trim()) {
         message.textContent="Nomor penerimaan dan nama pemasok wajib diisi.";
         return;
       }
-
       if (!$("receiptDate").value) {
         message.textContent="Tanggal penerimaan wajib diisi.";
         return;
       }
-
       if (!confirm("Apakah data penerimaan sudah benar dan akan disimpan?")) return;
 
       button.disabled=true;
       button.textContent="Menyimpan...";
       message.textContent="";
-
       try {
         const {data,error}=await supabaseClient.rpc("create_goods_receipt",{
           p_receipt_number:$("receiptNumber").value.trim(),
@@ -1073,7 +1168,6 @@ async function renderReceipts() {
           p_notes:$("receiptNotes").value.trim(),
           p_lines:lines
         });
-
         if (error) throw error;
 
         message.textContent="Penerimaan berhasil disimpan.";
@@ -1081,10 +1175,8 @@ async function renderReceipts() {
         $("receiptDate").value=new Date().toLocaleDateString("en-CA");
         $("receiptLines").innerHTML="";
         addReceiptLine();
-
         await loadDashboardData();
         await loadReceiptHistory();
-
       } catch(error) {
         message.textContent="Gagal menyimpan penerimaan: "+error.message;
       } finally {
@@ -1093,7 +1185,6 @@ async function renderReceipts() {
       }
     });
   }
-
   await loadReceiptHistory();
 }
 
@@ -1105,11 +1196,9 @@ const futurePages={
   stocktake:["Stok Opname","Pencocokan stok fisik dengan sistem."],
   settings:["Pengaturan","Pengaturan pengguna dan sistem."]
 };
-
 function renderFuturePage(page) {
   const config=futurePages[page];
   if (!config) return;
-
   $("pageContent").innerHTML=`
     <div class="page-heading">
       <div><h1>${config[0]}</h1><p>${config[1]}</p></div>
@@ -1118,8 +1207,7 @@ function renderFuturePage(page) {
     <div class="panel">
       <h3>${config[0]}</h3>
       <div class="empty">Fitur akan diaktifkan setelah alur transaksi dan keamanan selesai disiapkan.</div>
-    </div>
-  `;
+    </div>`;
 }
 
 /* NAVIGASI MENU */
@@ -1127,14 +1215,12 @@ function showPage(page) {
   document.querySelectorAll(".nav-btn").forEach(btn=>{
     btn.classList.toggle("active",btn.dataset.page===page);
   });
-
   if (page==="dashboard") renderDashboard();
   else if (page==="items") renderItems();
   else if (page==="batches") renderBatches();
   else if (page==="receipts") renderReceipts();
   else if (futurePages[page]) renderFuturePage(page);
 }
-
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.addEventListener("click",()=>showPage(btn.dataset.page));
 });
@@ -1154,7 +1240,6 @@ $("logoutButton").addEventListener("click",async()=>{
 
 async function checkSession() {
   if (!initializeSupabase()) return;
-
   const {data,error}=await supabaseClient.auth.getSession();
   if (error) {
     showLoginError(error.message);
@@ -1162,7 +1247,6 @@ async function checkSession() {
   }
   if (data.session) await loadUserProfile(data.session.user);
 }
-
 checkSession();
 </script>
 </body>
