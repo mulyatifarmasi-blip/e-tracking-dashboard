@@ -367,6 +367,7 @@ async function loadUserProfile(user) {
   showPage("dashboard");
 }
 
+
 /* =========================================
    DATA SUPABASE
 ========================================= */
@@ -376,42 +377,51 @@ async function loadDashboardData() {
     '<div class="empty">Mengambil data dari database...</div>';
 
   try {
-    const [itemsResult,batchesResult] = await Promise.all([
+    const [itemsResult, batchesResult] = await Promise.all([
       supabaseClient.from("items").select("*"),
-      supabaseClient
-  .from("stock_batches")
-  .select(`
-    id,
-    item_id,
-    batch_number,
-    expiry,
-    quantity,
-    item:items!stock_batch_item_id_fkey (
-      item_code,
-      item_name,
-      unit
-    )
-  `)
-  .order("expiry", { ascending: true, nullsFirst: false })
+      supabaseClient.from("stock_batches").select("*")
     ]);
 
     if (itemsResult.error) throw itemsResult.error;
     if (batchesResult.error) throw batchesResult.error;
 
+    // Simpan data Master Barang
     itemsData = itemsResult.data || [];
-    batchesData = batchesResult.data || [];
+
+    // Buat pencocokan berdasarkan ID barang
+    const itemMap = Object.fromEntries(
+      itemsData.map(item => [item.id, item])
+    );
+
+    // Gabungkan data batch dengan Master Barang
+    batchesData = (batchesResult.data || []).map(batch => ({
+      ...batch,
+      item: itemMap[batch.item_id] || null,
+      expiry: batch.expiry_date
+    }));
+
+    // Urutkan berdasarkan tanggal kedaluwarsa
+    batchesData.sort((a, b) => {
+      if (!a.expiry) return 1;
+      if (!b.expiry) return -1;
+      return new Date(a.expiry) - new Date(b.expiry);
+    });
+
   } catch(error) {
     $("pageContent").innerHTML = `
       <div class="panel">
         <h3>Gagal membaca database</h3>
         <p class="muted">${escapeHTML(error.message)}</p>
-        <button class="refresh-btn" onclick="refreshData()">Coba Lagi</button>
+        <button class="refresh-btn" onclick="refreshData()">
+          Coba Lagi
+        </button>
       </div>`;
     return false;
   }
 
   return true;
 }
+
 
 /* =========================================
    DASHBOARD
